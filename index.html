@@ -224,7 +224,12 @@
   .sc-top{
     display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;
   }
+  .sc-name-area {
+    display: flex; flex-direction: column; gap: 4px;
+  }
   .sc-name{font-size:15px; font-weight:700; display:flex; align-items:center; gap:10px;}
+  .sc-date{font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; margin-right:19px;}
+  
   .led{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
   .led.paid{background:var(--paid); box-shadow:0 0 0 3px var(--paid-dim);}
   .led.due{background:var(--due); box-shadow:0 0 0 3px var(--due-dim); animation:pulse 1.6s infinite;}
@@ -274,6 +279,12 @@
     font-family:'IBM Plex Sans Arabic', sans-serif;
   }
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  
+  /* تعديل شكل حقل التاريخ ليتناسب مع الثيم المظلم */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.8) sepia(1) saturate(5) hue-rotate(130deg);
+    cursor: pointer;
+  }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -310,6 +321,10 @@
       <div class="field full">
         <label>رابط السيرفر (M3U Link)</label>
         <input type="text" id="inUrl" placeholder="https://example.com/get.php?username=...&password=...&type=m3u_plus&output=ts">
+      </div>
+      <div class="field full">
+        <label>تاريخ نهاية الاشتراك</label>
+        <input type="date" id="inDate">
       </div>
     </div>
 
@@ -366,9 +381,33 @@ firebase.initializeApp(firebaseConfig);
 const dbRef = firebase.database().ref('servers_list');
 
 let servers = [];
-let editingServerId = null; // متغير لحفظ آيدي السيرفر الذي يتم تعديله حالياً
+let editingServerId = null; 
 
 const $ = id => document.getElementById(id);
+
+// دالة لجلب تاريخ اليوم بصيغة YYYY-MM-DD كقيمة احتياطية
+function getTodayDate() {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  let mm = today.getMonth() + 1; 
+  let dd = today.getDate();
+  if (mm < 10) mm = '0' + mm;
+  if (dd < 10) dd = '0' + dd;
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+// دالة لضبط التاريخ التلقائي بناءً على آخر سيرفر مضاف
+function setAutofillDate() {
+  if (servers.length > 0) {
+    // السيرفرات مرتبة تنازلياً، لذا فإن أول عنصر [0] هو آخر سيرفر مضاف
+    const lastServer = servers[0];
+    if (lastServer.expireDate) {
+      $('inDate').value = lastServer.expireDate;
+      return;
+    }
+  }
+  $('inDate').value = getTodayDate();
+}
 
 // ---------- Parsing ----------
 function parseUrl(raw){
@@ -403,6 +442,12 @@ function loadServers(){
     const data = snapshot.val();
     servers = data ? Object.values(data) : [];
     servers.sort((a, b) => b.id.localeCompare(a.id));
+    
+    // إذا لم نكن في وضع التعديل، نملأ حقل التاريخ تلقائياً بآخر قيمة متوفرة
+    if(!editingServerId) {
+      setAutofillDate();
+    }
+    
     render();
   }, (error) => {
     showToast('خطأ في تحميل البيانات السحابية');
@@ -429,6 +474,7 @@ $('btnAdd').addEventListener('click', (e) => {
   const name = $('inName').value.trim();
   const code = $('inCode').value.trim();
   const url = $('inUrl').value.trim();
+  const expireDate = $('inDate').value;
   const status = document.querySelector('input[name="payStatus"]:checked').value;
 
   if(!name || !url){
@@ -442,18 +488,16 @@ $('btnAdd').addEventListener('click', (e) => {
   }
 
   if (editingServerId) {
-    // وضع التعديل: تحديث بيانات السيرفر الحالي
     servers = servers.map(s => {
       if (s.id === editingServerId) {
-        return { ...s, name, code, url, host: parsed.host, username: parsed.username, password: parsed.password, status };
+        return { ...s, name, code, url, expireDate, host: parsed.host, username: parsed.username, password: parsed.password, status };
       }
       return s;
     });
   } else {
-    // وضع الإضافة: إدخال سيرفر جديد
     const newServer = {
       id: Date.now().toString(36),
-      name, code, url,
+      name, code, url, expireDate,
       host: parsed.host,
       username: parsed.username,
       password: parsed.password,
@@ -465,32 +509,30 @@ $('btnAdd').addEventListener('click', (e) => {
   saveServers();
 });
 
-// تفعيل وضع التعديل وجلب البيانات للحقول
 function startEdit(server) {
   editingServerId = server.id;
   $('inName').value = server.name;
   $('inCode').value = server.code || '';
   $('inUrl').value = server.url;
+  $('inDate').value = server.expireDate || getTodayDate();
   document.querySelector(`input[name="payStatus"][value="${server.status}"]`).checked = true;
   updatePreview();
 
-  // تغيير مظهر النموذج لوضع التعديل
   $('formCard').classList.add('editing-mode');
   $('formTitle').textContent = 'تعديل بيانات السيرفر الحالي';
   $('btnAdd').textContent = 'تحديث البيانات وعمل مزامنة';
   $('btnAdd').classList.add('btn-edit');
   $('btnCancel').style.display = 'block';
   
-  // الصعود لأعلى الصفحة بسلاسة لرؤية النموذج
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// إعادة تعيين النموذج للوضع الطبيعي
 function resetForm() {
   editingServerId = null;
   $('inName').value = '';
   $('inCode').value = '';
   $('inUrl').value = '';
+  setAutofillDate(); // إعادة ملء حقل التاريخ بآخر قيمة سيرفر بعد التهيئة
   document.querySelector('input[name="payStatus"][value="paid"]').checked = true;
   updatePreview();
 
@@ -527,9 +569,12 @@ function render(){
   list.innerHTML = filtered.map(s => `
     <div class="server-card ${s.status}">
       <div class="sc-top">
-        <div class="sc-name">
-          <span class="led ${s.status}"></span>
-          ${escapeHtml(s.name)}
+        <div class="sc-name-area">
+          <div class="sc-name">
+            <span class="led ${s.status}"></span>
+            ${escapeHtml(s.name)}
+          </div>
+          <div class="sc-date">📅 نهاية الاشتراك: ${s.expireDate ? escapeHtml(s.expireDate) : 'غير محدد'}</div>
         </div>
         ${s.code ? `<div class="sc-code">${escapeHtml(s.code)}</div>` : ''}
       </div>
