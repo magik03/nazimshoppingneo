@@ -155,6 +155,11 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 
 input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1) saturate(5) hue-rotate(130deg);cursor:pointer;}
 
+.date-quick{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
+.dq{flex:1;min-width:60px;padding:6px 4px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--accent);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;transition:.15s;font-weight:600;}
+.dq:hover{background:var(--accent-dim);border-color:var(--accent);filter:brightness(1.1);}
+.dq:active{transform:scale(.96);}
+
 @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}.preview{grid-template-columns:1fr;}.sc-grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -206,10 +211,16 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1)
     <div class="field">
       <label>تاريخ انتهاء الاشتراك</label>
       <input type="date" id="inDate">
+      <div class="date-quick">
+        <button type="button" class="dq" data-months="1">+١ شهر</button>
+        <button type="button" class="dq" data-months="3">+٣ أشهر</button>
+        <button type="button" class="dq" data-months="6">+٦ أشهر</button>
+        <button type="button" class="dq" data-months="12">+سنة</button>
+      </div>
     </div>
     <div class="field">
-      <label>ملاحظات / قنوات / اسم العميل</label>
-      <textarea id="inNotes" placeholder="مثال: باقة الأطفال والرياضية فقط..."></textarea>
+      <label>ملاحظات / رابط تعديل القنوات عن بعد</label>
+      <textarea id="inNotes" placeholder="مثال: باقة الأطفال والرياضية فقط...&#10;رابط تعديل القنوات: http://..."></textarea>
     </div>
   </div>
 
@@ -364,6 +375,15 @@ function resetForm(){
 $('btnCancel').addEventListener('click',resetForm);
 $('inUrl').addEventListener('input',updatePreview);
 $('srch').addEventListener('input',render);
+
+document.querySelectorAll('.dq').forEach(btn=>btn.addEventListener('click',function(){
+  const months=parseInt(this.dataset.months);
+  const base=$('inDate').value?new Date($('inDate').value+'T00:00:00'):new Date();
+  base.setMonth(base.getMonth()+months);
+  const m=String(base.getMonth()+1).padStart(2,'0'),dd=String(base.getDate()).padStart(2,'0');
+  $('inDate').value=`${base.getFullYear()}-${m}-${dd}`;
+  showToast(`تم ضبط التاريخ ✓`);
+}));
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',function(){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   this.classList.add('active');activeFilter=this.dataset.filter;render();
@@ -481,10 +501,21 @@ function renderCard(s,statusClass){
 function buildClientMsg(s){
   const dl=daysLeft(s.expireDate);
   let statusLine='';
-  if(dl!==null&&dl<=0)statusLine=`⚠️ اشتراكك انتهى منذ ${Math.abs(dl)} يوم`;
-  else if(dl!==null&&dl<=7)statusLine=`⏰ اشتراكك ينتهي بعد ${dl} يوم فقط`;
-  else if(dl!==null)statusLine=`✅ الاشتراك ساري — متبقي ${dl} يوم`;
-  return `مرحباً 👋\nمعلومات سيرفرك:\n\n🌐 Host: ${s.host||'—'}\n👤 User: ${s.username||'—'}\n🔑 Pass: ${s.password||'—'}\n📅 الانتهاء: ${s.expireDate||'—'}\n${statusLine}\n\n🔗 رابط M3U:\n${s.url||'—'}`;
+  if(dl!==null&&dl<=0)statusLine=`⚠️ منتهي منذ ${Math.abs(dl)} يوم`;
+  else if(dl!==null&&dl<=7)statusLine=`⏰ ينتهي بعد ${dl} يوم فقط`;
+  else if(dl!==null)statusLine=`✅ ساري — متبقي ${dl} يوم`;
+  let editLink='';
+  if(s.notes){const match=s.notes.match(/https?:\/\/[^\s]+/);if(match)editLink=match[0];}
+  let msg=`📺 *بيانات اشتراكك في سيرفر دمانة عبد المجيد* 📺\n`;
+  msg+=`مرحباً بك! يسعدنا تقديم تفاصيل سيرفر IPTV الخاص بك لتستمتع بمشاهدة مستقرة ولحظات لا تُنسى:\n\n`;
+  msg+=` * 🌐 *المضيف (Host):* ${s.host||'—'}\n`;
+  msg+=` * 👤 **اسم المستخدم (User): ${s.username||'—'}\n`;
+  msg+=` * 🔑 **كلمة المرور (Pass): ${s.password||'—'}\n`;
+  msg+=` * 📅 **تاريخ الانتهاء: ${s.expireDate||'—'}\n`;
+  msg+=` * ✅ **حالة الاشتراك: ${statusLine}\n`;
+  msg+=`\n### 🔗 **روابط التشغيل والتحكم: m3u\n${s.url||'—'}\n`;
+  if(editLink){msg+=`\n * 🛠️ **رابط تعديل واختيار القنوات والباقات:\n${editLink}`;}
+  return msg;
 }
 
 $('list').addEventListener('click',e=>{
