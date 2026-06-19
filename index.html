@@ -128,7 +128,7 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 
 .sc-msg-box{margin-top:8px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:12px;display:none;}
 .sc-msg-box.show{display:block;}
-.sc-msg-box textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;resize:none;height:60px;}
+.sc-msg-box textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;resize:none;height:220px;}
 .sc-msg-box textarea:focus{outline:none;border-color:var(--accent);}
 .sc-msg-box .msgbtns{display:flex;gap:7px;margin-top:8px;}
 .msgbtn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:600;transition:.15s;}
@@ -149,6 +149,9 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 
 .section-header{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 8px;padding-right:4px;display:flex;align-items:center;gap:6px;}
 .section-header::after{content:'';flex:1;height:1px;background:var(--line);}
+
+/* badge ترتيب الإدخال */
+.sc-order{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:var(--panel2);padding:2px 7px;border-radius:5px;border:1px solid var(--line);flex-shrink:0;}
 
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--panel2);border:1px solid var(--accent);color:var(--accent);padding:9px 18px;border-radius:24px;font-size:12px;opacity:0;transition:.25s;pointer-events:none;z-index:99;font-family:'IBM Plex Sans Arabic',sans-serif;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -419,6 +422,10 @@ function render(){
     return;
   }
 
+  const allSorted=[...servers].sort((a,b)=>b.id.localeCompare(a.id));
+  const orderMap={};
+  allSorted.forEach((s,i)=>{ orderMap[s.id]=i+1; });
+
   const groups={expired:[],due:[],paid:[]};
   filtered.forEach(s=>{
     const dl=daysLeft(s.expireDate);
@@ -428,24 +435,22 @@ function render(){
   });
 
   let html='';
-
   if(groups.expired.length){
     html+=`<div class="section-header">منتهية الاشتراك (${groups.expired.length})</div>`;
-    html+=groups.expired.map(s=>renderCard(s,'expired')).join('');
+    html+=groups.expired.map(s=>renderCard(s,'expired',orderMap[s.id])).join('');
   }
   if(groups.due.length){
     html+=`<div class="section-header">عليها دين (${groups.due.length})</div>`;
-    html+=groups.due.map(s=>renderCard(s,'due')).join('');
+    html+=groups.due.map(s=>renderCard(s,'due',orderMap[s.id])).join('');
   }
   if(groups.paid.length){
     html+=`<div class="section-header">مدفوعة (${groups.paid.length})</div>`;
-    html+=groups.paid.map(s=>renderCard(s,'paid')).join('');
+    html+=groups.paid.map(s=>renderCard(s,'paid',orderMap[s.id])).join('');
   }
-
   lst.innerHTML=html;
 }
 
-function renderCard(s,statusClass){
+function renderCard(s,statusClass,orderNum){
   const dl=daysLeft(s.expireDate);
   let daysHtml='';
   if(dl!==null){
@@ -454,6 +459,7 @@ function renderCard(s,statusClass){
     else daysHtml=`<span class="badge-days ok">متبقي ${dl} يوم</span>`;
   }
   const badgeLbl=statusClass==='expired'?'منتهي':statusClass==='due'?'دين':'مدفوع';
+  const orderBadge=orderNum?`<span class="sc-order">#${orderNum}</span>`:'';
   return `
 <div class="sc ${statusClass}" id="sc-${s.id}">
   <div class="sc-top">
@@ -462,6 +468,7 @@ function renderCard(s,statusClass){
         <span class="led ${statusClass}"></span>
         ${esc(s.name)}
         <span class="badge ${statusClass}">${badgeLbl}</span>
+        ${orderBadge}
       </div>
       <div class="sc-meta">
         📅 ${s.expireDate?esc(s.expireDate):'غير محدد'}
@@ -498,23 +505,35 @@ function renderCard(s,statusClass){
 </div>`;
 }
 
+// دالة بناء رسالة العميل مع التعديلات المطلوبة
 function buildClientMsg(s){
   const dl=daysLeft(s.expireDate);
   let statusLine='';
   if(dl!==null&&dl<=0)statusLine=`⚠️ منتهي منذ ${Math.abs(dl)} يوم`;
   else if(dl!==null&&dl<=7)statusLine=`⏰ ينتهي بعد ${dl} يوم فقط`;
   else if(dl!==null)statusLine=`✅ ساري — متبقي ${dl} يوم`;
+
+  // استخراج رابط من الملاحظات إذا وجد
   let editLink='';
-  if(s.notes){const match=s.notes.match(/https?:\/\/[^\s]+/);if(match)editLink=match[0];}
+  if(s.notes){
+    const match=s.notes.match(/https?:\/\/[^\s]+/);
+    if(match) editLink=match[0];
+  }
+
   let msg=`📺 *بيانات اشتراكك في سيرفر دمانة عبد المجيد* 📺\n`;
   msg+=`مرحباً بك! يسعدنا تقديم تفاصيل سيرفر IPTV الخاص بك لتستمتع بمشاهدة مستقرة ولحظات لا تُنسى:\n\n`;
-  msg+=` * 🌐 *المضيف (Host):* ${s.host||'—'}\n`;
-  msg+=` * 👤 **اسم المستخدم (User): ${s.username||'—'}\n`;
-  msg+=` * 🔑 **كلمة المرور (Pass): ${s.password||'—'}\n`;
-  msg+=` * 📅 **تاريخ الانتهاء: ${s.expireDate||'—'}\n`;
-  msg+=` * ✅ **حالة الاشتراك: ${statusLine}\n`;
-  msg+=`\n### 🔗 **روابط التشغيل والتحكم: m3u\n${s.url||'—'}\n`;
-  if(editLink){msg+=`\n * 🛠️ **رابط تعديل واختيار القنوات والباقات:\n${editLink}`;}
+  
+  // التعديل الأول: إضافة https:// قبل الهوست
+  msg+=` * 🌐 *(Host):* https://${s.host||'—'}\n`;
+  msg+=` * 👤 *(User):* ${s.username||'—'}\n`;
+  msg+=` * 🔑 *(Pass):* ${s.password||'—'}\n`;
+  msg+=` * 📅 *تاريخ الانتهاء:* ${s.expireDate||'—'}\n`;
+
+  // التعديل الثاني: الرابط والسطر يظهران فقط في حالة وجود ملاحظات مكتوبة تحتوي على رابط
+  if(s.notes && s.notes.trim() !== "" && editLink){
+    msg+=`\n * 🛠️ *رابط تعديل واختيار القنوات والباقات:*\n${editLink}`;
+  }
+  
   return msg;
 }
 
