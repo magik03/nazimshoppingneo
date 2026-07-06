@@ -88,6 +88,8 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .sc.paid::before{background:var(--paid);}
 .sc.due::before{background:var(--due);}
 .sc.expired::before{background:var(--expired);}
+.sc.due{border:1.5px solid var(--due);box-shadow:0 0 0 1px rgba(220,38,38,.12);}
+.sc.due:hover{border-color:var(--due);}
 
 .sc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;}
 .sc-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
@@ -164,8 +166,21 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
 .dq:hover{background:var(--accent-dim);border-color:var(--accent);filter:brightness(1.05);}
 .dq:active{transform:scale(.96);}
 
-.auto-detect-note{margin-top:6px;font-size:11px;color:var(--accent);display:none;align-items:center;gap:5px;background:var(--accent-dim);border:1px solid rgba(13,148,136,.25);border-radius:7px;padding:6px 10px;}
-.auto-detect-note.show{display:flex;}
+/* نافذة إدخال تاريخ بداية الاشتراك */
+.modal-overlay{position:fixed;inset:0;background:rgba(20,25,32,.45);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;max-width:360px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,.18);text-align:center;}
+.modal-box .m-icon{font-size:26px;margin-bottom:8px;}
+.modal-box h3{font-size:15px;margin-bottom:6px;}
+.modal-box p{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;}
+.modal-box .m-months{color:var(--accent);font-weight:700;font-family:'JetBrains Mono',monospace;}
+.modal-box input[type="date"]{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:11px 12px;color:var(--text);font-size:14px;font-family:'IBM Plex Sans Arabic',sans-serif;text-align:center;margin-bottom:16px;}
+.modal-box input[type="date"]:focus{outline:none;border-color:var(--accent);}
+.modal-btns{display:flex;gap:8px;}
+.modal-btns button{flex:1;border:none;border-radius:9px;padding:11px;font-size:13px;font-weight:700;font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;transition:filter .15s;}
+.modal-btns .m-confirm{background:var(--accent);color:#fff;}
+.modal-btns .m-cancel{background:var(--panel2);color:var(--muted);border:1px solid var(--line);}
+.modal-btns button:hover{filter:brightness(1.08);}
 
 @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}.preview{grid-template-columns:1fr;}.sc-grid{grid-template-columns:1fr;}}
 </style>
@@ -210,7 +225,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
     <div class="field">
       <label>رمز السيرفر <span class="opt">(اختياري)</span></label>
       <input type="text" id="inCode" placeholder="NEO12M930902878547">
-      <div class="auto-detect-note" id="autoNote">🕒 تم رصد مدة الاشتراك: <span id="autoNoteMonths"></span> شهر — تم ضبط التاريخ تلقائياً</div>
     </div>
     <div class="field full">
       <label>رابط M3U الكامل <span class="opt">(اختياري)</span></label>
@@ -260,6 +274,20 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
 <div id="list"></div>
 
 </div>
+
+<div class="modal-overlay" id="startDateModal">
+  <div class="modal-box">
+    <div class="m-icon">🗓️</div>
+    <h3>تاريخ بداية السيرفر</h3>
+    <p>تم رصد مدة اشتراك <span class="m-months" id="modalMonths">0</span> شهر من الرمز.<br>حدد تاريخ بداية الاشتراك (متى تم شراؤه) ليتم حساب تاريخ الانتهاء تلقائياً.</p>
+    <input type="date" id="inStartDate">
+    <div class="modal-btns">
+      <button class="m-confirm" id="modalConfirm">تأكيد وحفظ</button>
+      <button class="m-cancel" id="modalCancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -319,14 +347,13 @@ function getStatus(server){
   return server.status||'due';
 }
 
-// قراءة عدد الأشهر من رمز السيرفر: مثال NEO12M930902878547 -> 12 شهر / NEO3M243140492871 -> 3 أشهر
+// قراءة مدة الاشتراك من رمز السيرفر: فقط الأنماط الثابتة التالية
+// NEO1M -> شهر واحد | NEO3M -> 3 أشهر | NEO6M -> 6 أشهر | NEO12M -> 12 شهر
 function detectMonthsFromCode(code){
   if(!code)return null;
-  const m=code.trim().match(/^NEO(\d{1,2})M/i);
+  const m=code.trim().match(/^NEO(1|3|6|12)M/i);
   if(!m)return null;
-  const months=parseInt(m[1],10);
-  if(isNaN(months)||months<=0||months>36)return null;
-  return months;
+  return parseInt(m[1],10);
 }
 
 function addMonths(dateStr,months){
@@ -334,21 +361,6 @@ function addMonths(dateStr,months){
   base.setMonth(base.getMonth()+months);
   const mm=String(base.getMonth()+1).padStart(2,'0'),dd=String(base.getDate()).padStart(2,'0');
   return `${base.getFullYear()}-${mm}-${dd}`;
-}
-
-function handleCodeInput(){
-  const code=$('inCode').value;
-  const months=detectMonthsFromCode(code);
-  const note=$('autoNote');
-  if(months){
-    // عند التعديل نحسب من التاريخ الحالي، وعند الإضافة الجديدة من اليوم
-    const baseDate=editId?today():today();
-    $('inDate').value=addMonths(baseDate,months);
-    $('autoNoteMonths').textContent=months;
-    note.classList.add('show');
-  }else{
-    note.classList.remove('show');
-  }
 }
 
 db.on('value',snap=>{
@@ -374,11 +386,29 @@ function saveToDb(msg){
   }).catch(()=>showToast('تعذر الحفظ!'));
 }
 
+let pendingMonths=null;
+
 $('btnSave').addEventListener('click',()=>{
-  const name=$('inName').value.trim(),code=$('inCode').value.trim(),url=$('inUrl').value.trim(),expireDate=$('inDate').value,notes=$('inNotes').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
+  const name=$('inName').value.trim(),code=$('inCode').value.trim(),url=$('inUrl').value.trim(),notes=$('inNotes').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
   if(!name){showToast('يرجى إدخال الاسم على الأقل');return;}
   const parsed=parseUrl(url);
   if(url&&!parsed.valid){showToast('الرابط غير صحيح');return;}
+
+  const months=detectMonthsFromCode(code);
+  if(months){
+    // رمز السيرفر يحمل مدة اشتراك معروفة: نطلب تاريخ بداية الاشتراك عبر نافذة منبثقة
+    pendingMonths=months;
+    $('modalMonths').textContent=months;
+    $('inStartDate').value=today();
+    $('startDateModal').classList.add('show');
+    return;
+  }
+
+  const expireDate=$('inDate').value;
+  doSaveRecord(name,code,url,notes,status,parsed,expireDate);
+});
+
+function doSaveRecord(name,code,url,notes,status,parsed,expireDate){
   if(editId){
     servers=servers.map(s=>s.id===editId?{...s,name,code,url,expireDate,notes,...parsed,status}:s);
     saveToDb('تم التحديث بنجاح ✓');
@@ -386,6 +416,19 @@ $('btnSave').addEventListener('click',()=>{
     servers.unshift({id:Date.now().toString(36),name,code,url,expireDate,notes,...parsed,status});
     saveToDb('تمت الإضافة بنجاح ✓');
   }
+}
+
+$('modalConfirm').addEventListener('click',()=>{
+  const startDate=$('inStartDate').value||today();
+  const expireDate=addMonths(startDate,pendingMonths);
+  const name=$('inName').value.trim(),code=$('inCode').value.trim(),url=$('inUrl').value.trim(),notes=$('inNotes').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
+  const parsed=parseUrl(url);
+  $('startDateModal').classList.remove('show');
+  doSaveRecord(name,code,url,notes,status,parsed,expireDate);
+});
+
+$('modalCancel').addEventListener('click',()=>{
+  $('startDateModal').classList.remove('show');
 });
 
 function startEdit(sv){
@@ -394,7 +437,6 @@ function startEdit(sv){
   $('inDate').value=sv.expireDate||today();$('inNotes').value=sv.notes||'';
   document.querySelector(`input[name="ps"][value="${sv.status||'due'}"]`).checked=true;
   updatePreview();
-  $('autoNote').classList.remove('show');
   $('formCard').classList.add('editing-mode');
   $('formTitle').textContent='تعديل السيرفر';$('formTitle').className='card-title edit-title';
   $('btnSave').textContent='حفظ التعديلات';$('btnSave').className='btn btn-upd';
@@ -408,7 +450,6 @@ function resetForm(){
   setAutoDate();
   document.querySelector('input[name="ps"][value="paid"]').checked=true;
   updatePreview();
-  $('autoNote').classList.remove('show');
   $('formCard').classList.remove('editing-mode');
   $('formTitle').textContent='إضافة سيرفر جديد';$('formTitle').className='card-title';
   $('btnSave').textContent='إضافة السيرفر';$('btnSave').className='btn';
@@ -417,13 +458,11 @@ function resetForm(){
 
 $('btnCancel').addEventListener('click',resetForm);
 $('inUrl').addEventListener('input',updatePreview);
-$('inCode').addEventListener('input',handleCodeInput);
 $('srch').addEventListener('input',render);
 
 document.querySelectorAll('.dq').forEach(btn=>btn.addEventListener('click',function(){
   const months=parseInt(this.dataset.months);
   $('inDate').value=addMonths($('inDate').value,months);
-  $('autoNote').classList.remove('show');
   showToast(`تم ضبط التاريخ ✓`);
 }));
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',function(){
