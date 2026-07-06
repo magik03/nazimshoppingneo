@@ -8,11 +8,11 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
 :root{
-  --bg:#07090d;--panel:#0d1117;--panel2:#131a23;--line:#1e2733;
-  --text:#e6edf3;--muted:#6b7a8d;--accent:#2dd4bf;--accent-dim:#0a2422;
-  --paid:#22c55e;--paid-dim:#0a2218;--due:#f87171;--due-dim:#2a0f0f;
-  --expired:#f59e0b;--expired-dim:#2a1f06;
-  --edit:#60a5fa;--edit-dim:#0f1d2e;
+  --bg:#f5f6f8;--panel:#ffffff;--panel2:#f0f2f5;--line:#e2e5ea;
+  --text:#1a2027;--muted:#6b7a8d;--accent:#0d9488;--accent-dim:#e6f7f5;
+  --paid:#16a34a;--paid-dim:#e8f8ee;--due:#dc2626;--due-dim:#fdeaea;
+  --expired:#d97706;--expired-dim:#fdf1e0;
+  --edit:#2563eb;--edit-dim:#eaf1fd;
   --radius:10px;--r-lg:14px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -20,14 +20,14 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Arabic',s
 .wrap{max-width:1060px;margin:0 auto;}
 
 header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--line);}
-.logo{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#0a9e8e);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:#03201d;flex-shrink:0;}
+.logo{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#0a9e8e);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:#ffffff;flex-shrink:0;}
 header h1{font-size:18px;font-weight:700;}
 header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .header-sync{margin-right:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--paid);box-shadow:0 0 0 3px var(--paid-dim);flex-shrink:0;}
 
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
-.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;transition:.2s;}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.04);}
 .stat:hover{border-color:var(--accent);}
 .stat .num{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1;}
 .stat .lbl{font-size:11px;color:var(--muted);margin-top:4px;}
@@ -40,7 +40,7 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .tab:hover{border-color:var(--accent);color:var(--accent);}
 .tab.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
 
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;margin-bottom:18px;transition:border-color .3s;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;margin-bottom:18px;transition:border-color .3s;box-shadow:0 1px 3px rgba(0,0,0,.05);}
 .card.editing-mode{border-color:var(--edit);}
 .card-title{font-size:12px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:7px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px;}
 .card-title.edit-title{color:var(--edit);}
@@ -49,17 +49,18 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.field .opt{color:#a4afbd;font-weight:400;}
 .field input,.field select,.field textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'IBM Plex Sans Arabic',sans-serif;transition:border-color .15s;}
 .field textarea{resize:vertical;min-height:54px;}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);}
 .card.editing-mode .field input:focus,.card.editing-mode .field textarea:focus{border-color:var(--edit);}
-.field input::placeholder,.field textarea::placeholder{color:#3d4a5c;font-size:12px;}
+.field input::placeholder,.field textarea::placeholder{color:#9aa5b1;font-size:12px;}
 .full{grid-column:1/-1;}
 
 .preview{margin-top:14px;background:var(--panel2);border:1px dashed var(--line);border-radius:9px;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .preview .itm .k{color:var(--muted);font-size:10px;margin-bottom:3px;}
 .preview .itm .v{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);word-break:break-all;}
-.preview .itm .v.empty{color:#364050;}
+.preview .itm .v.empty{color:#b7bfc9;}
 
 .pay-toggle{display:flex;gap:8px;margin-top:5px;}
 .pay-toggle label{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px;cursor:pointer;background:var(--panel2);transition:.15s;}
@@ -68,7 +69,7 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .pay-toggle label:has(input:checked).opt-due{border-color:var(--due);background:var(--due-dim);color:var(--due);}
 
 .btn-group{display:flex;gap:8px;margin-top:14px;}
-.btn{flex:1;background:var(--accent);color:#03201d;border:none;border-radius:9px;padding:11px;font-size:13px;font-weight:700;font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;transition:filter .15s,transform .1s;}
+.btn{flex:1;background:var(--accent);color:#ffffff;border:none;border-radius:9px;padding:11px;font-size:13px;font-weight:700;font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;transition:filter .15s,transform .1s;}
 .btn:hover{filter:brightness(1.08);}
 .btn:active{transform:scale(.98);}
 .btn.btn-upd{background:var(--edit);color:#fff;}
@@ -81,8 +82,8 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 
 .empty{text-align:center;padding:40px 20px;color:var(--muted);border:1px dashed var(--line);border-radius:12px;font-size:13px;}
 
-.sc{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;margin-bottom:10px;position:relative;overflow:hidden;transition:border-color .2s;}
-.sc:hover{border-color:#2a3545;}
+.sc{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;margin-bottom:10px;position:relative;overflow:hidden;transition:border-color .2s;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+.sc:hover{border-color:#c7cdd6;}
 .sc::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;}
 .sc.paid::before{background:var(--paid);}
 .sc.due::before{background:var(--due);}
@@ -100,9 +101,9 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
 .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500;}
-.badge.paid{background:var(--paid-dim);color:var(--paid);border:1px solid rgba(34,197,94,0.2);}
-.badge.due{background:var(--due-dim);color:var(--due);border:1px solid rgba(248,113,113,0.2);}
-.badge.expired{background:var(--expired-dim);color:var(--expired);border:1px solid rgba(245,158,11,0.2);}
+.badge.paid{background:var(--paid-dim);color:var(--paid);border:1px solid rgba(22,163,74,0.2);}
+.badge.due{background:var(--due-dim);color:var(--due);border:1px solid rgba(220,38,38,0.2);}
+.badge.expired{background:var(--expired-dim);color:var(--expired);border:1px solid rgba(217,119,6,0.2);}
 .badge-days{font-size:10px;padding:2px 7px;border-radius:20px;font-family:'JetBrains Mono',monospace;}
 .badge-days.ok{background:var(--paid-dim);color:var(--paid);}
 .badge-days.soon{background:var(--expired-dim);color:var(--expired);}
@@ -128,11 +129,11 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 
 .sc-msg-box{margin-top:8px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:12px;display:none;}
 .sc-msg-box.show{display:block;}
-.sc-msg-box textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;resize:none;height:220px;}
+.sc-msg-box textarea{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;resize:none;height:220px;}
 .sc-msg-box textarea:focus{outline:none;border-color:var(--accent);}
 .sc-msg-box .msgbtns{display:flex;gap:7px;margin-top:8px;}
 .msgbtn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:600;transition:.15s;}
-.msgbtn.send{background:var(--accent);color:#03201d;}
+.msgbtn.send{background:var(--accent);color:#ffffff;}
 .msgbtn.cancel{background:var(--panel);color:var(--muted);border:1px solid var(--line);}
 .msgbtn:hover{filter:brightness(1.1);}
 
@@ -141,11 +142,11 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .pill:hover{border-color:var(--accent);color:var(--accent);}
 .pill.danger:hover{border-color:var(--due);color:var(--due);}
 .pill.edit-btn:hover{border-color:var(--edit);color:var(--edit);}
-.pill.msg-btn{background:var(--accent-dim);color:var(--accent);border-color:rgba(45,212,191,.2);}
-.pill.msg-btn:hover{background:var(--accent);color:#03201d;}
-.pill.status-toggle.paid{color:var(--paid);border-color:rgba(34,197,94,.25);}
-.pill.status-toggle.due{color:var(--due);border-color:rgba(248,113,113,.25);}
-.pill.status-toggle.expired{color:var(--expired);border-color:rgba(245,158,11,.25);}
+.pill.msg-btn{background:var(--accent-dim);color:var(--accent);border-color:rgba(13,148,136,.2);}
+.pill.msg-btn:hover{background:var(--accent);color:#ffffff;}
+.pill.status-toggle.paid{color:var(--paid);border-color:rgba(22,163,74,.25);}
+.pill.status-toggle.due{color:var(--due);border-color:rgba(220,38,38,.25);}
+.pill.status-toggle.expired{color:var(--expired);border-color:rgba(217,119,6,.25);}
 
 .section-header{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 8px;padding-right:4px;display:flex;align-items:center;gap:6px;}
 .section-header::after{content:'';flex:1;height:1px;background:var(--line);}
@@ -153,15 +154,18 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 /* badge ترتيب الإدخال */
 .sc-order{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:var(--panel2);padding:2px 7px;border-radius:5px;border:1px solid var(--line);flex-shrink:0;}
 
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--panel2);border:1px solid var(--accent);color:var(--accent);padding:9px 18px;border-radius:24px;font-size:12px;opacity:0;transition:.25s;pointer-events:none;z-index:99;font-family:'IBM Plex Sans Arabic',sans-serif;white-space:nowrap;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--panel);border:1px solid var(--accent);color:var(--accent);padding:9px 18px;border-radius:24px;font-size:12px;opacity:0;transition:.25s;pointer-events:none;z-index:99;font-family:'IBM Plex Sans Arabic',sans-serif;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.1);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1) saturate(5) hue-rotate(130deg);cursor:pointer;}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1) saturate(3) hue-rotate(130deg);cursor:pointer;}
 
 .date-quick{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
 .dq{flex:1;min-width:60px;padding:6px 4px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--accent);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;transition:.15s;font-weight:600;}
-.dq:hover{background:var(--accent-dim);border-color:var(--accent);filter:brightness(1.1);}
+.dq:hover{background:var(--accent-dim);border-color:var(--accent);filter:brightness(1.05);}
 .dq:active{transform:scale(.96);}
+
+.auto-detect-note{margin-top:6px;font-size:11px;color:var(--accent);display:none;align-items:center;gap:5px;background:var(--accent-dim);border:1px solid rgba(13,148,136,.25);border-radius:7px;padding:6px 10px;}
+.auto-detect-note.show{display:flex;}
 
 @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}.preview{grid-template-columns:1fr;}.sc-grid{grid-template-columns:1fr;}}
 </style>
@@ -204,11 +208,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1)
       <input type="text" id="inName" placeholder="مثال: أحمد - سيرفر الخليج">
     </div>
     <div class="field">
-      <label>رمز السيرفر (اختياري)</label>
-      <input type="text" id="inCode" placeholder="NEO1M138256123296">
+      <label>رمز السيرفر <span class="opt">(اختياري)</span></label>
+      <input type="text" id="inCode" placeholder="NEO12M930902878547">
+      <div class="auto-detect-note" id="autoNote">🕒 تم رصد مدة الاشتراك: <span id="autoNoteMonths"></span> شهر — تم ضبط التاريخ تلقائياً</div>
     </div>
     <div class="field full">
-      <label>رابط M3U الكامل</label>
+      <label>رابط M3U الكامل <span class="opt">(اختياري)</span></label>
       <input type="text" id="inUrl" placeholder="http://example.com/get.php?username=...&password=...">
     </div>
     <div class="field">
@@ -222,7 +227,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1)
       </div>
     </div>
     <div class="field">
-      <label>ملاحظات / رابط تعديل القنوات عن بعد</label>
+      <label>ملاحظات / رابط تعديل القنوات عن بعد <span class="opt">(اختياري)</span></label>
       <textarea id="inNotes" placeholder="مثال: باقة الأطفال والرياضية فقط...&#10;رابط تعديل القنوات: http://..."></textarea>
     </div>
   </div>
@@ -285,6 +290,7 @@ function daysLeft(dateStr){
 }
 
 function parseUrl(raw){
+  if(!raw||!raw.trim())return{host:'',username:'',password:'',valid:true};
   try{
     const u=new URL(raw.trim());
     return{host:u.hostname||'',username:u.searchParams.get('username')||'',password:u.searchParams.get('password')||'',valid:!!u.hostname};
@@ -313,6 +319,38 @@ function getStatus(server){
   return server.status||'due';
 }
 
+// قراءة عدد الأشهر من رمز السيرفر: مثال NEO12M930902878547 -> 12 شهر / NEO3M243140492871 -> 3 أشهر
+function detectMonthsFromCode(code){
+  if(!code)return null;
+  const m=code.trim().match(/^NEO(\d{1,2})M/i);
+  if(!m)return null;
+  const months=parseInt(m[1],10);
+  if(isNaN(months)||months<=0||months>36)return null;
+  return months;
+}
+
+function addMonths(dateStr,months){
+  const base=dateStr?new Date(dateStr+'T00:00:00'):new Date();
+  base.setMonth(base.getMonth()+months);
+  const mm=String(base.getMonth()+1).padStart(2,'0'),dd=String(base.getDate()).padStart(2,'0');
+  return `${base.getFullYear()}-${mm}-${dd}`;
+}
+
+function handleCodeInput(){
+  const code=$('inCode').value;
+  const months=detectMonthsFromCode(code);
+  const note=$('autoNote');
+  if(months){
+    // عند التعديل نحسب من التاريخ الحالي، وعند الإضافة الجديدة من اليوم
+    const baseDate=editId?today():today();
+    $('inDate').value=addMonths(baseDate,months);
+    $('autoNoteMonths').textContent=months;
+    note.classList.add('show');
+  }else{
+    note.classList.remove('show');
+  }
+}
+
 db.on('value',snap=>{
   const data=snap.val();
   servers=data?Object.values(data):[];
@@ -338,9 +376,9 @@ function saveToDb(msg){
 
 $('btnSave').addEventListener('click',()=>{
   const name=$('inName').value.trim(),code=$('inCode').value.trim(),url=$('inUrl').value.trim(),expireDate=$('inDate').value,notes=$('inNotes').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
-  if(!name||!url){showToast('يرجى إدخال الاسم والرابط');return;}
+  if(!name){showToast('يرجى إدخال الاسم على الأقل');return;}
   const parsed=parseUrl(url);
-  if(!parsed.valid){showToast('الرابط غير صحيح');return;}
+  if(url&&!parsed.valid){showToast('الرابط غير صحيح');return;}
   if(editId){
     servers=servers.map(s=>s.id===editId?{...s,name,code,url,expireDate,notes,...parsed,status}:s);
     saveToDb('تم التحديث بنجاح ✓');
@@ -352,10 +390,11 @@ $('btnSave').addEventListener('click',()=>{
 
 function startEdit(sv){
   editId=sv.id;
-  $('inName').value=sv.name;$('inCode').value=sv.code||'';$('inUrl').value=sv.url;
+  $('inName').value=sv.name;$('inCode').value=sv.code||'';$('inUrl').value=sv.url||'';
   $('inDate').value=sv.expireDate||today();$('inNotes').value=sv.notes||'';
   document.querySelector(`input[name="ps"][value="${sv.status||'due'}"]`).checked=true;
   updatePreview();
+  $('autoNote').classList.remove('show');
   $('formCard').classList.add('editing-mode');
   $('formTitle').textContent='تعديل السيرفر';$('formTitle').className='card-title edit-title';
   $('btnSave').textContent='حفظ التعديلات';$('btnSave').className='btn btn-upd';
@@ -369,6 +408,7 @@ function resetForm(){
   setAutoDate();
   document.querySelector('input[name="ps"][value="paid"]').checked=true;
   updatePreview();
+  $('autoNote').classList.remove('show');
   $('formCard').classList.remove('editing-mode');
   $('formTitle').textContent='إضافة سيرفر جديد';$('formTitle').className='card-title';
   $('btnSave').textContent='إضافة السيرفر';$('btnSave').className='btn';
@@ -377,14 +417,13 @@ function resetForm(){
 
 $('btnCancel').addEventListener('click',resetForm);
 $('inUrl').addEventListener('input',updatePreview);
+$('inCode').addEventListener('input',handleCodeInput);
 $('srch').addEventListener('input',render);
 
 document.querySelectorAll('.dq').forEach(btn=>btn.addEventListener('click',function(){
   const months=parseInt(this.dataset.months);
-  const base=$('inDate').value?new Date($('inDate').value+'T00:00:00'):new Date();
-  base.setMonth(base.getMonth()+months);
-  const m=String(base.getMonth()+1).padStart(2,'0'),dd=String(base.getDate()).padStart(2,'0');
-  $('inDate').value=`${base.getFullYear()}-${m}-${dd}`;
+  $('inDate').value=addMonths($('inDate').value,months);
+  $('autoNote').classList.remove('show');
   showToast(`تم ضبط التاريخ ✓`);
 }));
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',function(){
@@ -460,6 +499,7 @@ function renderCard(s,statusClass,orderNum){
   }
   const badgeLbl=statusClass==='expired'?'منتهي':statusClass==='due'?'دين':'مدفوع';
   const orderBadge=orderNum?`<span class="sc-order">#${orderNum}</span>`:'';
+  const hasUrl=s.url&&s.url.trim()!=='';
   return `
 <div class="sc ${statusClass}" id="sc-${s.id}">
   <div class="sc-top">
@@ -477,6 +517,7 @@ function renderCard(s,statusClass,orderNum){
     </div>
     ${s.code?`<div class="sc-code">${esc(s.code)}</div>`:''}
   </div>
+  ${hasUrl?`
   <div class="sc-grid">
     <div class="sc-field" data-copy="${esc(s.host||'')}"><span class="lab">Host</span><span class="v">${esc(s.host)||'—'}</span><span class="ico">نسخ</span></div>
     <div class="sc-field" data-copy="${esc(s.username||'')}"><span class="lab">User</span><span class="v">${esc(s.username)||'—'}</span><span class="ico">نسخ</span></div>
@@ -486,7 +527,7 @@ function renderCard(s,statusClass,orderNum){
     <span class="sc-url-lab">M3U</span>
     <span class="sc-url-val">${esc(s.url||'—')}</span>
     <span class="sc-url-ico">نسخ الرابط</span>
-  </div>
+  </div>`:''}
   ${s.notes?`<div class="sc-notes"><span class="ntitle">ملاحظات:</span>${esc(s.notes).replace(/\n/g,'<br>')}</div>`:''}
   <div class="sc-msg-box" id="msgbox-${s.id}">
     <textarea id="msgtxt-${s.id}" placeholder="اكتب رسالة للإرسال على واتساب/تيليغرام..."></textarea>
@@ -497,7 +538,7 @@ function renderCard(s,statusClass,orderNum){
   </div>
   <div class="sc-actions">
     <div class="pill msg-btn" data-action="genmsg" data-id="${s.id}">رسالة للعميل</div>
-    <div class="pill" data-action="copylink" data-id="${s.id}">نسخ الرابط</div>
+    ${hasUrl?`<div class="pill" data-action="copylink" data-id="${s.id}">نسخ الرابط</div>`:''}
     <div class="pill edit-btn" data-action="edit" data-id="${s.id}">تعديل</div>
     <div class="pill status-toggle ${statusClass}" data-action="toggle" data-id="${s.id}">${statusClass==='paid'?'تحويل لدين':'تحويل لمدفوع'}</div>
     <div class="pill danger" data-action="delete" data-id="${s.id}">حذف</div>
@@ -522,14 +563,14 @@ function buildClientMsg(s){
 
   let msg=`📺 *بيانات اشتراكك في سيرفر دمانة عبد المجيد* 📺\n`;
   msg+=`مرحباً بك! يسعدنا تقديم تفاصيل سيرفر IPTV الخاص بك لتستمتع بمشاهدة مستقرة ولحظات لا تُنسى:\n\n`;
-  
-  // التعديل الأول: إضافة https:// قبل الهوست
-  msg+=` * 🌐 *(Host):* https://${s.host||'—'}\n`;
-  msg+=` * 👤 *(User):* ${s.username||'—'}\n`;
-  msg+=` * 🔑 *(Pass):* ${s.password||'—'}\n`;
+
+  if(s.host){
+    msg+=` * 🌐 *(Host):* https://${s.host}\n`;
+    msg+=` * 👤 *(User):* ${s.username||'—'}\n`;
+    msg+=` * 🔑 *(Pass):* ${s.password||'—'}\n`;
+  }
   msg+=` * 📅 *تاريخ الانتهاء:* ${s.expireDate||'—'}\n`;
 
-  // التعديل الثاني: الرابط والسطر يظهران فقط في حالة وجود ملاحظات مكتوبة تحتوي على رابط
   if(s.notes && s.notes.trim() !== "" && editLink){
     msg+=`\n * 🛠️ *رابط تعديل واختيار القنوات والباقات:*\n${editLink}`;
   }
