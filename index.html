@@ -57,11 +57,6 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .field input::placeholder,.field textarea::placeholder{color:#9aa5b1;font-size:12px;}
 .full{grid-column:1/-1;}
 
-.preview{margin-top:14px;background:var(--panel2);border:1px dashed var(--line);border-radius:9px;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.preview .itm .k{color:var(--muted);font-size:10px;margin-bottom:3px;}
-.preview .itm .v{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);word-break:break-all;}
-.preview .itm .v.empty{color:#b7bfc9;}
-
 .pay-toggle{display:flex;gap:8px;margin-top:5px;}
 .pay-toggle label{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px;cursor:pointer;background:var(--panel2);transition:.15s;}
 .pay-toggle input{display:none;}
@@ -153,7 +148,6 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .section-header{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 8px;padding-right:4px;display:flex;align-items:center;gap:6px;}
 .section-header::after{content:'';flex:1;height:1px;background:var(--line);}
 
-/* badge ترتيب الإدخال */
 .sc-order{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:var(--panel2);padding:2px 7px;border-radius:5px;border:1px solid var(--line);flex-shrink:0;}
 
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--panel);border:1px solid var(--accent);color:var(--accent);padding:9px 18px;border-radius:24px;font-size:12px;opacity:0;transition:.25s;pointer-events:none;z-index:99;font-family:'IBM Plex Sans Arabic',sans-serif;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.1);}
@@ -166,7 +160,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
 .dq:hover{background:var(--accent-dim);border-color:var(--accent);filter:brightness(1.05);}
 .dq:active{transform:scale(.96);}
 
-/* نافذة إدخال تاريخ بداية الاشتراك */
 .modal-overlay{position:fixed;inset:0;background:rgba(20,25,32,.45);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;}
 .modal-overlay.show{display:flex;}
 .modal-box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;max-width:360px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,.18);text-align:center;}
@@ -182,7 +175,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
 .modal-btns .m-cancel{background:var(--panel2);color:var(--muted);border:1px solid var(--line);}
 .modal-btns button:hover{filter:brightness(1.08);}
 
-@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}.preview{grid-template-columns:1fr;}.sc-grid{grid-template-columns:1fr;}}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}.sc-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -224,11 +217,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
     </div>
     <div class="field">
       <label>رمز السيرفر <span class="opt">(اختياري)</span></label>
-      <input type="text" id="inCode" placeholder="NEO12M930902878547">
-    </div>
-    <div class="field full">
-      <label>رابط M3U الكامل <span class="opt">(اختياري)</span></label>
-      <input type="text" id="inUrl" placeholder="http://example.com/get.php?username=...&password=...">
+      <input type="text" id="inCode" placeholder="NEO12M930902878547" maxlength="30">
     </div>
     <div class="field">
       <label>تاريخ انتهاء الاشتراك</label>
@@ -240,16 +229,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
         <button type="button" class="dq" data-months="12">+سنة</button>
       </div>
     </div>
-    <div class="field">
-      <label>ملاحظات / رابط تعديل القنوات عن بعد <span class="opt">(اختياري)</span></label>
-      <textarea id="inNotes" placeholder="مثال: باقة الأطفال والرياضية فقط...&#10;رابط تعديل القنوات: http://..."></textarea>
-    </div>
-  </div>
-
-  <div class="preview">
-    <div class="itm"><div class="k">الهوست</div><div class="v empty" id="pHost">—</div></div>
-    <div class="itm"><div class="k">اليوزر</div><div class="v empty" id="pUser">—</div></div>
-    <div class="itm"><div class="k">الباسورد</div><div class="v empty" id="pPass">—</div></div>
   </div>
 
   <div class="field" style="margin-top:12px;">
@@ -317,25 +296,6 @@ function daysLeft(dateStr){
   return diff;
 }
 
-function parseUrl(raw){
-  if(!raw||!raw.trim())return{host:'',username:'',password:'',valid:true};
-  try{
-    const u=new URL(raw.trim());
-    return{host:u.hostname||'',username:u.searchParams.get('username')||'',password:u.searchParams.get('password')||'',valid:!!u.hostname};
-  }catch(e){return{host:'',username:'',password:'',valid:false};}
-}
-
-function updatePreview(){
-  const d=parseUrl($('inUrl').value||'');
-  setPrev('pHost',d.host);setPrev('pUser',d.username);setPrev('pPass',d.password);
-}
-
-function setPrev(id,val){
-  const el=$(id);
-  el.textContent=val||'—';
-  el.classList.toggle('empty',!val);
-}
-
 function setAutoDate(){
   if(servers.length>0&&servers[0].expireDate){$('inDate').value=servers[0].expireDate;return;}
   $('inDate').value=today();
@@ -388,11 +348,14 @@ function saveToDb(msg){
 
 let pendingMonths=null;
 
+// رمز السيرفر: حروف وأرقام فقط
+$('inCode').addEventListener('input',function(){
+  this.value=this.value.replace(/[^a-zA-Z0-9]/g,'');
+});
+
 $('btnSave').addEventListener('click',()=>{
-  const name=$('inName').value.trim(),code=$('inCode').value.trim(),url=$('inUrl').value.trim(),notes=$('inNotes').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
+  const name=$('inName').value.trim(),code=$('inCode').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
   if(!name){showToast('يرجى إدخال الاسم على الأقل');return;}
-  const parsed=parseUrl(url);
-  if(url&&!parsed.valid){showToast('الرابط غير صحيح');return;}
 
   const months=detectMonthsFromCode(code);
   if(months){
@@ -405,15 +368,15 @@ $('btnSave').addEventListener('click',()=>{
   }
 
   const expireDate=$('inDate').value;
-  doSaveRecord(name,code,url,notes,status,parsed,expireDate);
+  doSaveRecord(name,code,status,expireDate);
 });
 
-function doSaveRecord(name,code,url,notes,status,parsed,expireDate){
+function doSaveRecord(name,code,status,expireDate){
   if(editId){
-    servers=servers.map(s=>s.id===editId?{...s,name,code,url,expireDate,notes,...parsed,status}:s);
+    servers=servers.map(s=>s.id===editId?{...s,name,code,expireDate,status}:s);
     saveToDb('تم التحديث بنجاح ✓');
   }else{
-    servers.unshift({id:Date.now().toString(36),name,code,url,expireDate,notes,...parsed,status});
+    servers.unshift({id:Date.now().toString(36),name,code,expireDate,status});
     saveToDb('تمت الإضافة بنجاح ✓');
   }
 }
@@ -421,10 +384,9 @@ function doSaveRecord(name,code,url,notes,status,parsed,expireDate){
 $('modalConfirm').addEventListener('click',()=>{
   const startDate=$('inStartDate').value||today();
   const expireDate=addMonths(startDate,pendingMonths);
-  const name=$('inName').value.trim(),code=$('inCode').value.trim(),url=$('inUrl').value.trim(),notes=$('inNotes').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
-  const parsed=parseUrl(url);
+  const name=$('inName').value.trim(),code=$('inCode').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
   $('startDateModal').classList.remove('show');
-  doSaveRecord(name,code,url,notes,status,parsed,expireDate);
+  doSaveRecord(name,code,status,expireDate);
 });
 
 $('modalCancel').addEventListener('click',()=>{
@@ -433,10 +395,9 @@ $('modalCancel').addEventListener('click',()=>{
 
 function startEdit(sv){
   editId=sv.id;
-  $('inName').value=sv.name;$('inCode').value=sv.code||'';$('inUrl').value=sv.url||'';
-  $('inDate').value=sv.expireDate||today();$('inNotes').value=sv.notes||'';
+  $('inName').value=sv.name;$('inCode').value=sv.code||'';
+  $('inDate').value=sv.expireDate||today();
   document.querySelector(`input[name="ps"][value="${sv.status||'due'}"]`).checked=true;
-  updatePreview();
   $('formCard').classList.add('editing-mode');
   $('formTitle').textContent='تعديل السيرفر';$('formTitle').className='card-title edit-title';
   $('btnSave').textContent='حفظ التعديلات';$('btnSave').className='btn btn-upd';
@@ -446,10 +407,9 @@ function startEdit(sv){
 
 function resetForm(){
   editId=null;
-  $('inName').value='';$('inCode').value='';$('inUrl').value='';$('inNotes').value='';
+  $('inName').value='';$('inCode').value='';
   setAutoDate();
   document.querySelector('input[name="ps"][value="paid"]').checked=true;
-  updatePreview();
   $('formCard').classList.remove('editing-mode');
   $('formTitle').textContent='إضافة سيرفر جديد';$('formTitle').className='card-title';
   $('btnSave').textContent='إضافة السيرفر';$('btnSave').className='btn';
@@ -457,7 +417,6 @@ function resetForm(){
 }
 
 $('btnCancel').addEventListener('click',resetForm);
-$('inUrl').addEventListener('input',updatePreview);
 $('srch').addEventListener('input',render);
 
 document.querySelectorAll('.dq').forEach(btn=>btn.addEventListener('click',function(){
@@ -477,8 +436,7 @@ function render(){
   let filtered=servers.filter(s=>
     s.name.toLowerCase().includes(term)||
     (s.host||'').toLowerCase().includes(term)||
-    (s.code||'').toLowerCase().includes(term)||
-    (s.notes||'').toLowerCase().includes(term)
+    (s.code||'').toLowerCase().includes(term)
   );
 
   const expiredCount=servers.filter(s=>{const dl=daysLeft(s.expireDate);return dl!==null&&dl<=0;}).length;
@@ -538,7 +496,6 @@ function renderCard(s,statusClass,orderNum){
   }
   const badgeLbl=statusClass==='expired'?'منتهي':statusClass==='due'?'دين':'مدفوع';
   const orderBadge=orderNum?`<span class="sc-order">#${orderNum}</span>`:'';
-  const hasUrl=s.url&&s.url.trim()!=='';
   return `
 <div class="sc ${statusClass}" id="sc-${s.id}">
   <div class="sc-top">
@@ -556,18 +513,6 @@ function renderCard(s,statusClass,orderNum){
     </div>
     ${s.code?`<div class="sc-code">${esc(s.code)}</div>`:''}
   </div>
-  ${hasUrl?`
-  <div class="sc-grid">
-    <div class="sc-field" data-copy="${esc(s.host||'')}"><span class="lab">Host</span><span class="v">${esc(s.host)||'—'}</span><span class="ico">نسخ</span></div>
-    <div class="sc-field" data-copy="${esc(s.username||'')}"><span class="lab">User</span><span class="v">${esc(s.username)||'—'}</span><span class="ico">نسخ</span></div>
-    <div class="sc-field" data-copy="${esc(s.password||'')}"><span class="lab">Pass</span><span class="v">${esc(s.password)||'—'}</span><span class="ico">نسخ</span></div>
-  </div>
-  <div class="sc-url-row" data-copy="${esc(s.url||'')}">
-    <span class="sc-url-lab">M3U</span>
-    <span class="sc-url-val">${esc(s.url||'—')}</span>
-    <span class="sc-url-ico">نسخ الرابط</span>
-  </div>`:''}
-  ${s.notes?`<div class="sc-notes"><span class="ntitle">ملاحظات:</span>${esc(s.notes).replace(/\n/g,'<br>')}</div>`:''}
   <div class="sc-msg-box" id="msgbox-${s.id}">
     <textarea id="msgtxt-${s.id}" placeholder="اكتب رسالة للإرسال على واتساب/تيليغرام..."></textarea>
     <div class="msgbtns">
@@ -577,7 +522,6 @@ function renderCard(s,statusClass,orderNum){
   </div>
   <div class="sc-actions">
     <div class="pill msg-btn" data-action="genmsg" data-id="${s.id}">رسالة للعميل</div>
-    ${hasUrl?`<div class="pill" data-action="copylink" data-id="${s.id}">نسخ الرابط</div>`:''}
     <div class="pill edit-btn" data-action="edit" data-id="${s.id}">تعديل</div>
     <div class="pill status-toggle ${statusClass}" data-action="toggle" data-id="${s.id}">${statusClass==='paid'?'تحويل لدين':'تحويل لمدفوع'}</div>
     <div class="pill danger" data-action="delete" data-id="${s.id}">حذف</div>
@@ -585,7 +529,7 @@ function renderCard(s,statusClass,orderNum){
 </div>`;
 }
 
-// دالة بناء رسالة العميل مع التعديلات المطلوبة
+// دالة بناء رسالة العميل
 function buildClientMsg(s){
   const dl=daysLeft(s.expireDate);
   let statusLine='';
@@ -593,36 +537,17 @@ function buildClientMsg(s){
   else if(dl!==null&&dl<=7)statusLine=`⏰ ينتهي بعد ${dl} يوم فقط`;
   else if(dl!==null)statusLine=`✅ ساري — متبقي ${dl} يوم`;
 
-  // استخراج رابط من الملاحظات إذا وجد
-  let editLink='';
-  if(s.notes){
-    const match=s.notes.match(/https?:\/\/[^\s]+/);
-    if(match) editLink=match[0];
-  }
-
   let msg=`📺 *بيانات اشتراكك في سيرفر دمانة عبد المجيد* 📺\n`;
-  msg+=`مرحباً بك! يسعدنا تقديم تفاصيل سيرفر IPTV الخاص بك لتستمتع بمشاهدة مستقرة ولحظات لا تُنسى:\n\n`;
-
-  if(s.host){
-    msg+=` * 🌐 *(Host):* https://${s.host}\n`;
-    msg+=` * 👤 *(User):* ${s.username||'—'}\n`;
-    msg+=` * 🔑 *(Pass):* ${s.password||'—'}\n`;
+  msg+=`مرحباً بك! يسعدنا تقديم تفاصيل اشتراكك لتستمتع بمشاهدة مستقرة ولحظات لا تُنسى:\n\n`;
+  if(s.code){
+    msg+=` * 🔢 *الرمز:* ${s.code}\n`;
   }
   msg+=` * 📅 *تاريخ الانتهاء:* ${s.expireDate||'—'}\n`;
 
-  if(s.notes && s.notes.trim() !== "" && editLink){
-    msg+=`\n * 🛠️ *رابط تعديل واختيار القنوات والباقات:*\n${editLink}`;
-  }
-  
   return msg;
 }
 
 $('list').addEventListener('click',e=>{
-  const cf=e.target.closest('.sc-field');
-  if(cf){const v=cf.getAttribute('data-copy');if(v)copy(v,'تم نسخ القيمة ✓');return;}
-  const ur=e.target.closest('.sc-url-row');
-  if(ur){const v=ur.getAttribute('data-copy');if(v)copy(v,'تم نسخ الرابط ✓');return;}
-
   const el=e.target.closest('[data-action]');
   if(!el)return;
   const id=el.getAttribute('data-id');
@@ -641,7 +566,6 @@ $('list').addEventListener('click',e=>{
     sv.status=sv.status==='paid'?'due':'paid';
     saveToDb('تم تغيير الحالة ✓');
   }
-  else if(action==='copylink'&&sv){copy(sv.url,'تم نسخ الرابط الكامل ✓');}
   else if(action==='genmsg'&&sv){
     const box=$(`msgbox-${id}`);
     if(box){
