@@ -89,7 +89,7 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .sc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;}
 .sc-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
 .sc-meta{font-size:11px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.sc-code{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:var(--panel2);padding:3px 7px;border-radius:5px;border:1px solid var(--line);white-space:nowrap;}
+.sc-code{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:var(--panel2);padding:3px 7px;border-radius:5px;border:1px solid var(--line);white-space:normal;word-break:break-all;max-width:55%;direction:ltr;}
 
 .led{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .led.paid{background:var(--paid);box-shadow:0 0 0 3px var(--paid-dim);}
@@ -216,10 +216,23 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
       <input type="text" id="inName" placeholder="مثال: أحمد - سيرفر الخليج">
     </div>
     <div class="field">
-      <label>رمز السيرفر <span class="opt">(اختياري)</span></label>
-      <input type="text" id="inCode" placeholder="NEO12M930902878547" maxlength="30">
+      <label>مدة السيرفر</label>
+      <select id="inMonths">
+        <option value="0">غير محددة</option>
+        <option value="1">شهر</option>
+        <option value="2">شهرين</option>
+        <option value="3">3 أشهر</option>
+        <option value="4">4 أشهر</option>
+        <option value="5">5 أشهر</option>
+        <option value="6">6 أشهر</option>
+        <option value="12">سنة</option>
+      </select>
     </div>
-    <div class="field">
+    <div class="field full">
+      <label>رمز السيرفر <span class="opt">(اختياري)</span></label>
+      <input type="text" id="inCode" dir="ltr" autocomplete="off" placeholder="NEO12M930902878547">
+    </div>
+    <div class="field full">
       <label>تاريخ انتهاء الاشتراك</label>
       <input type="date" id="inDate">
       <div class="date-quick">
@@ -296,10 +309,7 @@ function daysLeft(dateStr){
   return diff;
 }
 
-function setAutoDate(){
-  if(servers.length>0&&servers[0].expireDate){$('inDate').value=servers[0].expireDate;return;}
-  $('inDate').value=today();
-}
+function setAutoDate(){ $('inDate').value=today(); }
 
 function getStatus(server){
   const dl=daysLeft(server.expireDate);
@@ -322,6 +332,20 @@ function addMonths(dateStr,months){
   const mm=String(base.getMonth()+1).padStart(2,'0'),dd=String(base.getDate()).padStart(2,'0');
   return `${base.getFullYear()}-${mm}-${dd}`;
 }
+
+function monthsLabel(m){
+  if(!m)return'';
+  if(m===1)return'شهر';
+  if(m===2)return'شهرين';
+  if(m===12)return'سنة';
+  return m<=10?`${m} أشهر`:`${m} شهر`;
+}
+function remainLabel(dl){
+  const mo=Math.floor(dl/30),d=dl%30;
+  if(mo<1)return `${dl} يوم`;
+  return monthsLabel(mo)+(d?` و ${d} يوم`:'');
+}
+function norm(s){return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
 
 db.on('value',snap=>{
   const data=snap.val();
@@ -348,9 +372,13 @@ function saveToDb(msg){
 
 let pendingMonths=null;
 
-// رمز السيرفر: حروف وأرقام فقط
+// رمز السيرفر: يقبل أي حرف فرنسي أو رقم أو نقطة أو رمز، ويمنع الحروف العربية فقط
 $('inCode').addEventListener('input',function(){
-  this.value=this.value.replace(/[^a-zA-Z0-9]/g,'');
+  this.value=this.value.replace(/[\u0600-\u06FF]/g,'');
+});
+$('inMonths').addEventListener('change',function(){
+  const m=parseInt(this.value)||0;
+  if(m)$('inDate').value=addMonths(today(),m);
 });
 
 $('btnSave').addEventListener('click',()=>{
@@ -358,7 +386,7 @@ $('btnSave').addEventListener('click',()=>{
   if(!name){showToast('يرجى إدخال الاسم على الأقل');return;}
 
   const months=detectMonthsFromCode(code);
-  if(months){
+  if(months&&!editId){
     // رمز السيرفر يحمل مدة اشتراك معروفة: نطلب تاريخ بداية الاشتراك عبر نافذة منبثقة
     pendingMonths=months;
     $('modalMonths').textContent=months;
@@ -368,15 +396,16 @@ $('btnSave').addEventListener('click',()=>{
   }
 
   const expireDate=$('inDate').value;
-  doSaveRecord(name,code,status,expireDate);
+  doSaveRecord(name,code,status,expireDate,parseInt($('inMonths').value)||0);
 });
 
-function doSaveRecord(name,code,status,expireDate){
+function doSaveRecord(name,code,status,expireDate,months){
+  months=months||0;
   if(editId){
-    servers=servers.map(s=>s.id===editId?{...s,name,code,expireDate,status}:s);
+    servers=servers.map(s=>s.id===editId?{...s,name,code,expireDate,status,months}:s);
     saveToDb('تم التحديث بنجاح ✓');
   }else{
-    servers.unshift({id:Date.now().toString(36),name,code,expireDate,status});
+    servers.unshift({id:Date.now().toString(36),name,code,expireDate,status,months});
     saveToDb('تمت الإضافة بنجاح ✓');
   }
 }
@@ -386,7 +415,7 @@ $('modalConfirm').addEventListener('click',()=>{
   const expireDate=addMonths(startDate,pendingMonths);
   const name=$('inName').value.trim(),code=$('inCode').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
   $('startDateModal').classList.remove('show');
-  doSaveRecord(name,code,status,expireDate);
+  doSaveRecord(name,code,status,expireDate,pendingMonths);
 });
 
 $('modalCancel').addEventListener('click',()=>{
@@ -396,6 +425,7 @@ $('modalCancel').addEventListener('click',()=>{
 function startEdit(sv){
   editId=sv.id;
   $('inName').value=sv.name;$('inCode').value=sv.code||'';
+  $('inMonths').value=String(sv.months||0);
   $('inDate').value=sv.expireDate||today();
   document.querySelector(`input[name="ps"][value="${sv.status||'due'}"]`).checked=true;
   $('formCard').classList.add('editing-mode');
@@ -408,6 +438,7 @@ function startEdit(sv){
 function resetForm(){
   editId=null;
   $('inName').value='';$('inCode').value='';
+  $('inMonths').value='0';
   setAutoDate();
   document.querySelector('input[name="ps"][value="paid"]').checked=true;
   $('formCard').classList.remove('editing-mode');
@@ -432,11 +463,10 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',function
 function esc(s){return(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
 function render(){
-  const term=$('srch').value.trim().toLowerCase();
+  const raw=$('srch').value.trim();
+  const term=norm(raw);
   let filtered=servers.filter(s=>
-    s.name.toLowerCase().includes(term)||
-    (s.host||'').toLowerCase().includes(term)||
-    (s.code||'').toLowerCase().includes(term)
+    norm(s.name).includes(term)||norm(s.host).includes(term)||norm(s.code).includes(term)
   );
 
   const expiredCount=servers.filter(s=>{const dl=daysLeft(s.expireDate);return dl!==null&&dl<=0;}).length;
@@ -454,7 +484,7 @@ function render(){
 
   const lst=$('list');
   if(filtered.length===0){
-    lst.innerHTML=`<div class="empty">📡<br><br>لا توجد سيرفرات${term?` تطابق "${esc(term)}"`:' في هذا القسم'}</div>`;
+    lst.innerHTML=`<div class="empty">📡<br><br>لا توجد سيرفرات${raw?` تطابق "${esc(raw)}"`:' في هذا القسم'}</div>`;
     return;
   }
 
@@ -469,6 +499,9 @@ function render(){
     else if(s.status==='due')groups.due.push(s);
     else groups.paid.push(s);
   });
+
+  const byDur=(a,b)=>(b.months||0)-(a.months||0)||(daysLeft(a.expireDate)||0)-(daysLeft(b.expireDate)||0);
+  groups.expired.sort(byDur);groups.due.sort(byDur);groups.paid.sort(byDur);
 
   let html='';
   if(groups.expired.length){
@@ -492,7 +525,7 @@ function renderCard(s,statusClass,orderNum){
   if(dl!==null){
     if(dl<=0)daysHtml=`<span class="badge-days exp">منتهي منذ ${Math.abs(dl)} يوم</span>`;
     else if(dl<=7)daysHtml=`<span class="badge-days soon">متبقي ${dl} يوم</span>`;
-    else daysHtml=`<span class="badge-days ok">متبقي ${dl} يوم</span>`;
+    else daysHtml=`<span class="badge-days ok">متبقي ${remainLabel(dl)} (${dl} يوم)</span>`;
   }
   const badgeLbl=statusClass==='expired'?'منتهي':statusClass==='due'?'دين':'مدفوع';
   const orderBadge=orderNum?`<span class="sc-order">#${orderNum}</span>`:'';
@@ -508,6 +541,7 @@ function renderCard(s,statusClass,orderNum){
       </div>
       <div class="sc-meta">
         📅 ${s.expireDate?esc(s.expireDate):'غير محدد'}
+        ${s.months?`<span>⏱ المدة: ${monthsLabel(s.months)}</span>`:''}
         ${daysHtml}
       </div>
     </div>
