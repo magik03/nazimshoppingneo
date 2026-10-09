@@ -55,7 +55,9 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);}
 .card.editing-mode .field input:focus,.card.editing-mode .field textarea:focus{border-color:var(--edit);}
 .field input::placeholder,.field textarea::placeholder{color:#9aa5b1;font-size:12px;}
+.field input[readonly]{color:var(--accent);font-weight:600;}
 .full{grid-column:1/-1;}
+.hint{font-size:11px;color:var(--muted);margin-top:5px;}
 
 .pay-toggle{display:flex;gap:8px;margin-top:5px;}
 .pay-toggle label{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px;cursor:pointer;background:var(--panel2);transition:.15s;}
@@ -87,9 +89,20 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .sc.due:hover{border-color:var(--due);}
 
 .sc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;}
-.sc-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
-.sc-meta{font-size:11px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.sc-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .sc-code{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:var(--panel2);padding:3px 7px;border-radius:5px;border:1px solid var(--line);white-space:normal;word-break:break-all;max-width:55%;direction:ltr;}
+
+/* صندوق التواريخ: الشراء - المدة - الانتهاء - المتبقي */
+.sc-dates{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.dbox{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;}
+.dbox .dl{font-size:10px;color:var(--muted);display:block;margin-bottom:3px;}
+.dbox .dv{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:ltr;text-align:right;}
+.dbox .dv.ar{font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;}
+.dbox.end .dv{color:var(--accent);}
+.dbox.rem.ok .dv{color:var(--paid);}
+.dbox.rem.soon .dv{color:var(--expired);}
+.dbox.rem.exp .dv{color:var(--due);}
+.dbox .na{color:#a4afbd;font-weight:400;}
 
 .led{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .led.paid{background:var(--paid);box-shadow:0 0 0 3px var(--paid-dim);}
@@ -101,28 +114,6 @@ header p{font-size:12px;color:var(--muted);margin-top:2px;}
 .badge.paid{background:var(--paid-dim);color:var(--paid);border:1px solid rgba(22,163,74,0.2);}
 .badge.due{background:var(--due-dim);color:var(--due);border:1px solid rgba(220,38,38,0.2);}
 .badge.expired{background:var(--expired-dim);color:var(--expired);border:1px solid rgba(217,119,6,0.2);}
-.badge-days{font-size:10px;padding:2px 7px;border-radius:20px;font-family:'JetBrains Mono',monospace;}
-.badge-days.ok{background:var(--paid-dim);color:var(--paid);}
-.badge-days.soon{background:var(--expired-dim);color:var(--expired);}
-.badge-days.exp{background:var(--due-dim);color:var(--due);}
-
-.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;}
-.sc-field{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:6px;cursor:pointer;transition:.15s;min-width:0;}
-.sc-field:hover{border-color:var(--accent);}
-.sc-field .v{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);flex:1;}
-.sc-field .lab{color:var(--muted);font-size:9px;font-family:'IBM Plex Sans Arabic',sans-serif;flex-shrink:0;margin-left:5px;}
-.sc-field .ico{color:var(--accent);font-size:10px;flex-shrink:0;opacity:0;transition:.15s;font-family:'IBM Plex Sans Arabic',sans-serif;}
-.sc-field:hover .ico{opacity:1;}
-
-.sc-url-row{margin-top:6px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:.15s;}
-.sc-url-row:hover{border-color:var(--accent);}
-.sc-url-lab{font-size:10px;color:var(--muted);white-space:nowrap;font-family:'IBM Plex Sans Arabic',sans-serif;}
-.sc-url-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
-.sc-url-ico{font-size:10px;color:var(--accent);flex-shrink:0;opacity:0;transition:.15s;font-family:'IBM Plex Sans Arabic',sans-serif;}
-.sc-url-row:hover .sc-url-ico{opacity:1;}
-
-.sc-notes{margin-top:8px;background:var(--panel2);border:1px solid var(--line);border-right:3px solid var(--accent);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--text);line-height:1.5;}
-.sc-notes .ntitle{font-size:10px;color:var(--muted);margin-bottom:3px;display:block;}
 
 .sc-msg-box{margin-top:8px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:12px;display:none;}
 .sc-msg-box.show{display:block;}
@@ -157,25 +148,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
 
 .date-quick{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
 .dq{flex:1;min-width:60px;padding:6px 4px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--accent);font-size:12px;font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;transition:.15s;font-weight:600;}
-.dq:hover{background:var(--accent-dim);border-color:var(--accent);filter:brightness(1.05);}
+.dq:hover{background:var(--accent-dim);border-color:var(--accent);}
 .dq:active{transform:scale(.96);}
 
-.modal-overlay{position:fixed;inset:0;background:rgba(20,25,32,.45);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;}
-.modal-overlay.show{display:flex;}
-.modal-box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;max-width:360px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,.18);text-align:center;}
-.modal-box .m-icon{font-size:26px;margin-bottom:8px;}
-.modal-box h3{font-size:15px;margin-bottom:6px;}
-.modal-box p{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;}
-.modal-box .m-months{color:var(--accent);font-weight:700;font-family:'JetBrains Mono',monospace;}
-.modal-box input[type="date"]{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:11px 12px;color:var(--text);font-size:14px;font-family:'IBM Plex Sans Arabic',sans-serif;text-align:center;margin-bottom:16px;}
-.modal-box input[type="date"]:focus{outline:none;border-color:var(--accent);}
-.modal-btns{display:flex;gap:8px;}
-.modal-btns button{flex:1;border:none;border-radius:9px;padding:11px;font-size:13px;font-weight:700;font-family:'IBM Plex Sans Arabic',sans-serif;cursor:pointer;transition:filter .15s;}
-.modal-btns .m-confirm{background:var(--accent);color:#fff;}
-.modal-btns .m-cancel{background:var(--panel2);color:var(--muted);border:1px solid var(--line);}
-.modal-btns button:hover{filter:brightness(1.08);}
-
-@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}.sc-grid{grid-template-columns:1fr;}}
+@media(max-width:640px){
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .grid2{grid-template-columns:1fr;}
+  .sc-dates{grid-template-columns:repeat(2,1fr);}
+}
 </style>
 </head>
 <body>
@@ -195,8 +175,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
 
 <div class="stats">
   <div class="stat"><div class="num" id="sTotal">—</div><div class="lbl">إجمالي السيرفرات</div></div>
-  <div class="stat paid"><div class="num" id="sPaid">—</div><div class="lbl">مدفوعة</div></div>
-  <div class="stat due"><div class="num" id="sDue">—</div><div class="lbl">عليها دين</div></div>
+  <div class="stat paid"><div class="num" id="sPaid">—</div><div class="lbl">مدفوعة (سارية)</div></div>
+  <div class="stat due"><div class="num" id="sDue">—</div><div class="lbl">عليها دين (سارية)</div></div>
   <div class="stat exp"><div class="num" id="sExp">—</div><div class="lbl">منتهية / قريبة</div></div>
 </div>
 
@@ -216,7 +196,24 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
       <input type="text" id="inName" placeholder="مثال: أحمد - سيرفر الخليج">
     </div>
     <div class="field">
-      <label>مدة السيرفر</label>
+      <label>رمز السيرفر <span class="opt">(اختياري — إذا بدأ بـ NEO1M / NEO3M / NEO6M / NEO12M تُضبط المدة تلقائياً)</span></label>
+      <input type="text" id="inCode" dir="ltr" autocomplete="off" placeholder="NEO12M930902878547">
+    </div>
+    <div class="field">
+      <label>👤 اسم المستخدم <span class="opt">(اختياري)</span></label>
+      <input type="text" id="inUser" dir="ltr" autocomplete="off" placeholder="username">
+    </div>
+    <div class="field">
+      <label>🔑 كلمة المرور <span class="opt">(اختياري)</span></label>
+      <input type="text" id="inPass" dir="ltr" autocomplete="off" placeholder="password">
+    </div>
+
+    <div class="field">
+      <label>📅 تاريخ الشراء (بداية الاشتراك)</label>
+      <input type="date" id="inStart">
+    </div>
+    <div class="field">
+      <label>⏱ مدة السيرفر</label>
       <select id="inMonths">
         <option value="0">غير محددة</option>
         <option value="1">شهر</option>
@@ -228,19 +225,17 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
         <option value="12">سنة</option>
       </select>
     </div>
+
     <div class="field full">
-      <label>رمز السيرفر <span class="opt">(اختياري)</span></label>
-      <input type="text" id="inCode" dir="ltr" autocomplete="off" placeholder="NEO12M930902878547">
-    </div>
-    <div class="field full">
-      <label>تاريخ انتهاء الاشتراك</label>
+      <label>🏁 تاريخ الانتهاء <span class="opt">(يُحسب تلقائياً = الشراء + المدة، ويمكنك تعديله يدوياً)</span></label>
       <input type="date" id="inDate">
       <div class="date-quick">
-        <button type="button" class="dq" data-months="1">+١ شهر</button>
-        <button type="button" class="dq" data-months="3">+٣ أشهر</button>
-        <button type="button" class="dq" data-months="6">+٦ أشهر</button>
-        <button type="button" class="dq" data-months="12">+سنة</button>
+        <button type="button" class="dq" data-months="1">شهر</button>
+        <button type="button" class="dq" data-months="3">3 أشهر</button>
+        <button type="button" class="dq" data-months="6">6 أشهر</button>
+        <button type="button" class="dq" data-months="12">سنة</button>
       </div>
+      <div class="hint" id="calcHint"></div>
     </div>
   </div>
 
@@ -260,24 +255,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1)
 
 <div class="list-head">
   <h2>السيرفرات المسجّلة</h2>
-  <div class="search"><input type="text" id="srch" placeholder="بحث بالاسم، الهوست، الرمز..."></div>
+  <div class="search"><input type="text" id="srch" placeholder="بحث بالاسم أو الرمز..."></div>
 </div>
 
 <div id="list"></div>
 
-</div>
-
-<div class="modal-overlay" id="startDateModal">
-  <div class="modal-box">
-    <div class="m-icon">🗓️</div>
-    <h3>تاريخ بداية السيرفر</h3>
-    <p>تم رصد مدة اشتراك <span class="m-months" id="modalMonths">0</span> شهر من الرمز.<br>حدد تاريخ بداية الاشتراك (متى تم شراؤه) ليتم حساب تاريخ الانتهاء تلقائياً.</p>
-    <input type="date" id="inStartDate">
-    <div class="modal-btns">
-      <button class="m-confirm" id="modalConfirm">تأكيد وحفظ</button>
-      <button class="m-cancel" id="modalCancel">إلغاء</button>
-    </div>
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -295,42 +277,50 @@ const FC={
 firebase.initializeApp(FC);
 const db=firebase.database().ref('servers_list');
 
-let servers=[],editId=null,activeFilter='all';
+let servers=[],editId=null,activeFilter='all',firstLoad=true;
 const $=id=>document.getElementById(id);
 
-function today(){
-  const d=new Date(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');
-  return `${d.getFullYear()}-${m}-${dd}`;
-}
+/* ---------- التواريخ ---------- */
+function pad(n){return String(n).padStart(2,'0');}
+function fmt(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
+function today(){return fmt(new Date());}
+function parse(s){return new Date(s+'T00:00:00');}
 
 function daysLeft(dateStr){
   if(!dateStr)return null;
-  const diff=Math.ceil((new Date(dateStr)-new Date(today()))/(1000*60*60*24));
-  return diff;
+  return Math.round((parse(dateStr)-parse(today()))/86400000);
 }
 
-function setAutoDate(){ $('inDate').value=today(); }
+// إضافة أشهر مع الحفاظ على اليوم (31 يناير + شهر = 28/29 فبراير وليس 3 مارس)
+function addMonths(dateStr,months){
+  const base=dateStr?parse(dateStr):parse(today());
+  const day=base.getDate();
+  base.setDate(1);
+  base.setMonth(base.getMonth()+months);
+  const last=new Date(base.getFullYear(),base.getMonth()+1,0).getDate();
+  base.setDate(Math.min(day,last));
+  return fmt(base);
+}
 
-function getStatus(server){
-  const dl=daysLeft(server.expireDate);
+// تاريخ الشراء: المخزّن، أو يُستنتج من (الانتهاء - المدة) للسجلات القديمة
+function getStart(s){
+  if(s.startDate)return s.startDate;
+  if(s.expireDate&&s.months)return addMonths(s.expireDate,-s.months);
+  return '';
+}
+
+function getStatus(s){
+  const dl=daysLeft(s.expireDate);
   if(dl!==null&&dl<=0)return 'expired';
-  return server.status||'due';
+  return s.status||'due';
 }
 
-// قراءة مدة الاشتراك من رمز السيرفر: فقط الأنماط الثابتة التالية
-// NEO1M -> شهر واحد | NEO3M -> 3 أشهر | NEO6M -> 6 أشهر | NEO12M -> 12 شهر
+/* ---------- المدة من الرمز ---------- */
+// NEO1M -> 1 | NEO3M -> 3 | NEO6M -> 6 | NEO12M -> 12
 function detectMonthsFromCode(code){
   if(!code)return null;
   const m=code.trim().match(/^NEO(1|3|6|12)M/i);
-  if(!m)return null;
-  return parseInt(m[1],10);
-}
-
-function addMonths(dateStr,months){
-  const base=dateStr?new Date(dateStr+'T00:00:00'):new Date();
-  base.setMonth(base.getMonth()+months);
-  const mm=String(base.getMonth()+1).padStart(2,'0'),dd=String(base.getDate()).padStart(2,'0');
-  return `${base.getFullYear()}-${mm}-${dd}`;
+  return m?parseInt(m[1],10):null;
 }
 
 function monthsLabel(m){
@@ -346,12 +336,77 @@ function remainLabel(dl){
   return monthsLabel(mo)+(d?` و ${d} يوم`:'');
 }
 function norm(s){return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function esc(s){return(s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
+/* ---------- الحساب التلقائي في النموذج ---------- */
+function recalc(){
+  const m=parseInt($('inMonths').value)||0;
+  const st=$('inStart').value;
+  if(m&&st){
+    $('inDate').value=addMonths(st,m);
+  }
+  updateHint();
+}
+function updateHint(){
+  const st=$('inStart').value,en=$('inDate').value,m=parseInt($('inMonths').value)||0;
+  if(st&&en){
+    const total=Math.round((parse(en)-parse(st))/86400000);
+    $('calcHint').textContent=`من ${st} إلى ${en}${m?` — المدة: ${monthsLabel(m)}`:''} (${total} يوم)`;
+  }else $('calcHint').textContent='';
+}
+
+$('inStart').addEventListener('change',recalc);
+$('inMonths').addEventListener('change',recalc);
+// عند تعديل تاريخ الانتهاء مباشرة: يُحسب تاريخ الشراء = الانتهاء - المدة
+$('inDate').addEventListener('change',()=>{
+  const m=parseInt($('inMonths').value)||0;
+  const en=$('inDate').value;
+  if(m&&en){
+    $('inStart').value=addMonths(en,-m);
+    showToast('تم حساب تاريخ الشراء تلقائياً ✓');
+  }
+  updateHint();
+});
+
+// استخراج اسم المستخدم وكلمة المرور من رابط مثل:
+// http://host/get.php?username=AAA&password=BBB&type=m3u_plus
+// اسم المستخدم = ما بعد username= حتى أول &  |  كلمة المرور = ما بعد password= حتى أول &
+function extractCreds(text){
+  if(!text)return;
+  const u=text.match(/[?&]username=([^&\s]*)/i);
+  const p=text.match(/[?&]password=([^&\s]*)/i);
+  const dec=v=>{try{return decodeURIComponent(v);}catch(e){return v;}};
+  let found=false;
+  if(u&&u[1]){$('inUser').value=dec(u[1]);found=true;}
+  if(p&&p[1]){$('inPass').value=dec(p[1]);found=true;}
+  if(found)showToast('تم استخراج اسم المستخدم وكلمة المرور ✓');
+}
+
+// رمز السيرفر: يمنع الحروف العربية، ويضبط المدة تلقائياً من NEO
+$('inCode').addEventListener('input',function(){
+  this.value=this.value.replace(/[\u0600-\u06FF]/g,'');
+  extractCreds(this.value);
+  const m=detectMonthsFromCode(this.value);
+  if(m){
+    $('inMonths').value=String(m);
+    recalc();
+    showToast(`تم رصد مدة ${monthsLabel(m)} من الرمز`);
+  }
+});
+
+// أزرار سريعة: تضبط المدة ثم تحسب الانتهاء من تاريخ الشراء
+document.querySelectorAll('.dq').forEach(btn=>btn.addEventListener('click',function(){
+  $('inMonths').value=this.dataset.months;
+  if(!$('inStart').value)$('inStart').value=today();
+  recalc();
+}));
+
+/* ---------- Firebase ---------- */
 db.on('value',snap=>{
   const data=snap.val();
   servers=data?Object.values(data):[];
   servers.sort((a,b)=>b.id.localeCompare(a.id));
-  if(!editId)setAutoDate();
+  if(firstLoad&&!editId){firstLoad=false;resetForm(true);}
   $('syncDot').style.background='var(--paid)';
   $('syncTxt').textContent='متصل ومتزامن';
   render();
@@ -361,72 +416,50 @@ db.on('value',snap=>{
   showToast('تعذر الاتصال بالسيرفر');
 });
 
-function saveToDb(msg){
+function saveToDb(msg,keepForm){
   const obj={};
   servers.forEach(s=>{obj[s.id]=s;});
   db.set(obj).then(()=>{
     showToast(msg||'تم الحفظ بنجاح ✓');
-    resetForm();
+    if(!keepForm)resetForm();
   }).catch(()=>showToast('تعذر الحفظ!'));
 }
 
-let pendingMonths=null;
-
-// رمز السيرفر: يقبل أي حرف فرنسي أو رقم أو نقطة أو رمز، ويمنع الحروف العربية فقط
-$('inCode').addEventListener('input',function(){
-  this.value=this.value.replace(/[\u0600-\u06FF]/g,'');
-});
-$('inMonths').addEventListener('change',function(){
-  const m=parseInt(this.value)||0;
-  if(m)$('inDate').value=addMonths(today(),m);
-});
-
+/* ---------- حفظ / تعديل ---------- */
 $('btnSave').addEventListener('click',()=>{
-  const name=$('inName').value.trim(),code=$('inCode').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
-  if(!name){showToast('يرجى إدخال الاسم على الأقل');return;}
-
-  const months=detectMonthsFromCode(code);
-  if(months&&!editId){
-    // رمز السيرفر يحمل مدة اشتراك معروفة: نطلب تاريخ بداية الاشتراك عبر نافذة منبثقة
-    pendingMonths=months;
-    $('modalMonths').textContent=months;
-    $('inStartDate').value=today();
-    $('startDateModal').classList.add('show');
-    return;
-  }
-
+  const name=$('inName').value.trim();
+  const code=$('inCode').value.trim();
+  extractCreds(code);
+  const username=$('inUser').value.trim();
+  const password=$('inPass').value.trim();
+  const status=document.querySelector('input[name="ps"]:checked').value;
+  const startDate=$('inStart').value;
   const expireDate=$('inDate').value;
-  doSaveRecord(name,code,status,expireDate,parseInt($('inMonths').value)||0);
-});
+  const months=parseInt($('inMonths').value)||0;
 
-function doSaveRecord(name,code,status,expireDate,months){
-  months=months||0;
+  if(!name){showToast('يرجى إدخال الاسم على الأقل');return;}
+  if(!startDate){showToast('يرجى تحديد تاريخ الشراء');return;}
+  if(expireDate&&expireDate<startDate){showToast('تاريخ الانتهاء قبل تاريخ الشراء!');return;}
+
   if(editId){
-    servers=servers.map(s=>s.id===editId?{...s,name,code,expireDate,status,months}:s);
+    servers=servers.map(s=>s.id===editId?{...s,name,code,username,password,startDate,expireDate,status,months}:s);
     saveToDb('تم التحديث بنجاح ✓');
   }else{
-    servers.unshift({id:Date.now().toString(36),name,code,expireDate,status,months});
+    servers.unshift({id:Date.now().toString(36),name,code,username,password,startDate,expireDate,status,months});
     saveToDb('تمت الإضافة بنجاح ✓');
   }
-}
-
-$('modalConfirm').addEventListener('click',()=>{
-  const startDate=$('inStartDate').value||today();
-  const expireDate=addMonths(startDate,pendingMonths);
-  const name=$('inName').value.trim(),code=$('inCode').value.trim(),status=document.querySelector('input[name="ps"]:checked').value;
-  $('startDateModal').classList.remove('show');
-  doSaveRecord(name,code,status,expireDate,pendingMonths);
-});
-
-$('modalCancel').addEventListener('click',()=>{
-  $('startDateModal').classList.remove('show');
 });
 
 function startEdit(sv){
   editId=sv.id;
-  $('inName').value=sv.name;$('inCode').value=sv.code||'';
+  $('inName').value=sv.name;
+  $('inCode').value=sv.code||'';
+  $('inUser').value=sv.username||'';
+  $('inPass').value=sv.password||'';
   $('inMonths').value=String(sv.months||0);
-  $('inDate').value=sv.expireDate||today();
+  $('inStart').value=getStart(sv)||today();
+  $('inDate').value=sv.expireDate||'';
+  updateHint();
   document.querySelector(`input[name="ps"][value="${sv.status||'due'}"]`).checked=true;
   $('formCard').classList.add('editing-mode');
   $('formTitle').textContent='تعديل السيرفر';$('formTitle').className='card-title edit-title';
@@ -438,8 +471,11 @@ function startEdit(sv){
 function resetForm(){
   editId=null;
   $('inName').value='';$('inCode').value='';
+  $('inUser').value='';$('inPass').value='';
   $('inMonths').value='0';
-  setAutoDate();
+  $('inStart').value=today();
+  $('inDate').value=today();
+  updateHint();
   document.querySelector('input[name="ps"][value="paid"]').checked=true;
   $('formCard').classList.remove('editing-mode');
   $('formTitle').textContent='إضافة سيرفر جديد';$('formTitle').className='card-title';
@@ -447,39 +483,31 @@ function resetForm(){
   $('btnCancel').style.display='none';
 }
 
-$('btnCancel').addEventListener('click',resetForm);
+$('btnCancel').addEventListener('click',()=>resetForm());
 $('srch').addEventListener('input',render);
 
-document.querySelectorAll('.dq').forEach(btn=>btn.addEventListener('click',function(){
-  const months=parseInt(this.dataset.months);
-  $('inDate').value=addMonths($('inDate').value,months);
-  showToast(`تم ضبط التاريخ ✓`);
-}));
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',function(){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   this.classList.add('active');activeFilter=this.dataset.filter;render();
 }));
 
-function esc(s){return(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-
+/* ---------- العرض ---------- */
 function render(){
   const raw=$('srch').value.trim();
   const term=norm(raw);
-  let filtered=servers.filter(s=>
-    norm(s.name).includes(term)||norm(s.host).includes(term)||norm(s.code).includes(term)
-  );
+  let filtered=servers.filter(s=>norm(s.name).includes(term)||norm(s.code).includes(term)||norm(s.username).includes(term));
 
   const expiredCount=servers.filter(s=>{const dl=daysLeft(s.expireDate);return dl!==null&&dl<=0;}).length;
   const soonCount=servers.filter(s=>{const dl=daysLeft(s.expireDate);return dl!==null&&dl>0&&dl<=7;}).length;
 
   $('sTotal').textContent=servers.length;
-  $('sPaid').textContent=servers.filter(s=>s.status==='paid').length;
-  $('sDue').textContent=servers.filter(s=>s.status==='due').length;
+  $('sPaid').textContent=servers.filter(s=>getStatus(s)==='paid').length;
+  $('sDue').textContent=servers.filter(s=>getStatus(s)==='due').length;
   $('sExp').textContent=expiredCount+soonCount;
 
-  if(activeFilter==='paid')filtered=filtered.filter(s=>s.status==='paid'&&daysLeft(s.expireDate)>0);
-  else if(activeFilter==='due')filtered=filtered.filter(s=>s.status==='due'&&daysLeft(s.expireDate)>0);
-  else if(activeFilter==='expired')filtered=filtered.filter(s=>{const dl=daysLeft(s.expireDate);return dl!==null&&dl<=0;});
+  if(activeFilter==='paid')filtered=filtered.filter(s=>getStatus(s)==='paid');
+  else if(activeFilter==='due')filtered=filtered.filter(s=>getStatus(s)==='due');
+  else if(activeFilter==='expired')filtered=filtered.filter(s=>getStatus(s)==='expired');
   else if(activeFilter==='soon')filtered=filtered.filter(s=>{const dl=daysLeft(s.expireDate);return dl!==null&&dl>0&&dl<=7;});
 
   const lst=$('list');
@@ -488,20 +516,15 @@ function render(){
     return;
   }
 
-  const allSorted=[...servers].sort((a,b)=>b.id.localeCompare(a.id));
   const orderMap={};
-  allSorted.forEach((s,i)=>{ orderMap[s.id]=i+1; });
+  [...servers].sort((a,b)=>b.id.localeCompare(a.id)).forEach((s,i)=>{orderMap[s.id]=i+1;});
 
   const groups={expired:[],due:[],paid:[]};
-  filtered.forEach(s=>{
-    const dl=daysLeft(s.expireDate);
-    if(dl!==null&&dl<=0)groups.expired.push(s);
-    else if(s.status==='due')groups.due.push(s);
-    else groups.paid.push(s);
-  });
+  filtered.forEach(s=>groups[getStatus(s)].push(s));
 
-  const byDur=(a,b)=>(b.months||0)-(a.months||0)||(daysLeft(a.expireDate)||0)-(daysLeft(b.expireDate)||0);
-  groups.expired.sort(byDur);groups.due.sort(byDur);groups.paid.sort(byDur);
+  // الأحدث شراءً أولاً (ثم حسب وقت الإضافة)
+  const byBuy=(a,b)=>(getStart(b)||'').localeCompare(getStart(a)||'')||b.id.localeCompare(a.id);
+  groups.expired.sort(byBuy);groups.due.sort(byBuy);groups.paid.sort(byBuy);
 
   let html='';
   if(groups.expired.length){
@@ -521,32 +544,43 @@ function render(){
 
 function renderCard(s,statusClass,orderNum){
   const dl=daysLeft(s.expireDate);
-  let daysHtml='';
+  const start=getStart(s);
+  const na='<span class="na">غير محدد</span>';
+
+  let remCls='ok',remTxt='—';
   if(dl!==null){
-    if(dl<=0)daysHtml=`<span class="badge-days exp">منتهي منذ ${Math.abs(dl)} يوم</span>`;
-    else if(dl<=7)daysHtml=`<span class="badge-days soon">متبقي ${dl} يوم</span>`;
-    else daysHtml=`<span class="badge-days ok">متبقي ${remainLabel(dl)} (${dl} يوم)</span>`;
+    if(dl<=0){remCls='exp';remTxt=`منتهي منذ ${Math.abs(dl)} يوم`;}
+    else if(dl<=7){remCls='soon';remTxt=`${dl} يوم فقط`;}
+    else{remCls='ok';remTxt=`${remainLabel(dl)}`;}
   }
+
   const badgeLbl=statusClass==='expired'?'منتهي':statusClass==='due'?'دين':'مدفوع';
   const orderBadge=orderNum?`<span class="sc-order">#${orderNum}</span>`:'';
+
   return `
 <div class="sc ${statusClass}" id="sc-${s.id}">
   <div class="sc-top">
-    <div>
-      <div class="sc-name">
-        <span class="led ${statusClass}"></span>
-        ${esc(s.name)}
-        <span class="badge ${statusClass}">${badgeLbl}</span>
-        ${orderBadge}
-      </div>
-      <div class="sc-meta">
-        📅 ${s.expireDate?esc(s.expireDate):'غير محدد'}
-        ${s.months?`<span>⏱ المدة: ${monthsLabel(s.months)}</span>`:''}
-        ${daysHtml}
-      </div>
+    <div class="sc-name">
+      <span class="led ${statusClass}"></span>
+      ${esc(s.name)}
+      <span class="badge ${statusClass}">${badgeLbl}</span>
+      ${orderBadge}
     </div>
     ${s.code?`<div class="sc-code">${esc(s.code)}</div>`:''}
   </div>
+
+  <div class="sc-dates">
+    <div class="dbox"><span class="dl">📅 تاريخ الشراء</span><div class="dv">${start?esc(start):na}</div></div>
+    <div class="dbox"><span class="dl">⏱ المدة</span><div class="dv ar">${s.months?monthsLabel(s.months):na}</div></div>
+    <div class="dbox end"><span class="dl">🏁 ينتهي في</span><div class="dv">${s.expireDate?esc(s.expireDate):na}</div></div>
+    <div class="dbox rem ${remCls}"><span class="dl">⏳ المتبقي</span><div class="dv ar">${remTxt}</div></div>
+  </div>
+
+  ${(s.username||s.password)?`<div class="sc-dates" style="margin-top:6px;grid-template-columns:repeat(2,1fr)">
+    <div class="dbox"><span class="dl">👤 اسم المستخدم</span><div class="dv">${s.username?esc(s.username):na}</div></div>
+    <div class="dbox"><span class="dl">🔑 كلمة المرور</span><div class="dv">${s.password?esc(s.password):na}</div></div>
+  </div>`:''}
+
   <div class="sc-msg-box" id="msgbox-${s.id}">
     <textarea id="msgtxt-${s.id}" placeholder="اكتب رسالة للإرسال على واتساب/تيليغرام..."></textarea>
     <div class="msgbtns">
@@ -557,27 +591,23 @@ function renderCard(s,statusClass,orderNum){
   <div class="sc-actions">
     <div class="pill msg-btn" data-action="genmsg" data-id="${s.id}">رسالة للعميل</div>
     <div class="pill edit-btn" data-action="edit" data-id="${s.id}">تعديل</div>
-    <div class="pill status-toggle ${statusClass}" data-action="toggle" data-id="${s.id}">${statusClass==='paid'?'تحويل لدين':'تحويل لمدفوع'}</div>
+    <div class="pill status-toggle ${statusClass}" data-action="toggle" data-id="${s.id}">${s.status==='paid'?'تحويل لدين':'تحويل لمدفوع'}</div>
     <div class="pill danger" data-action="delete" data-id="${s.id}">حذف</div>
   </div>
 </div>`;
 }
 
-// دالة بناء رسالة العميل
+/* ---------- رسالة العميل ---------- */
 function buildClientMsg(s){
-  const dl=daysLeft(s.expireDate);
-  let statusLine='';
-  if(dl!==null&&dl<=0)statusLine=`⚠️ منتهي منذ ${Math.abs(dl)} يوم`;
-  else if(dl!==null&&dl<=7)statusLine=`⏰ ينتهي بعد ${dl} يوم فقط`;
-  else if(dl!==null)statusLine=`✅ ساري — متبقي ${dl} يوم`;
-
+  const start=getStart(s);
   let msg=`📺 *بيانات اشتراكك في سيرفر دمانة عبد المجيد* 📺\n`;
   msg+=`مرحباً بك! يسعدنا تقديم تفاصيل اشتراكك لتستمتع بمشاهدة مستقرة ولحظات لا تُنسى:\n\n`;
-  if(s.code){
-    msg+=` * 🔢 *الرمز:* ${s.code}\n`;
-  }
+  if(s.code)msg+=` * 🔢 *الرمز:* ${s.code}\n`;
+  if(s.username)msg+=` * 👤 *اسم المستخدم:* ${s.username}\n`;
+  if(s.password)msg+=` * 🔑 *كلمة المرور:* ${s.password}\n`;
+  if(start)msg+=` * 🛒 *تاريخ الشراء:* ${start}\n`;
+  if(s.months)msg+=` * ⏱ *المدة:* ${monthsLabel(s.months)}\n`;
   msg+=` * 📅 *تاريخ الانتهاء:* ${s.expireDate||'—'}\n`;
-
   return msg;
 }
 
@@ -593,20 +623,18 @@ $('list').addEventListener('click',e=>{
     if(confirm(`حذف "${sv.name}"؟`)){
       servers=servers.filter(s=>s.id!==id);
       if(editId===id)resetForm();
-      saveToDb('تم الحذف');
+      saveToDb('تم الحذف',true);
     }
   }
   else if(action==='toggle'&&sv){
     sv.status=sv.status==='paid'?'due':'paid';
-    saveToDb('تم تغيير الحالة ✓');
+    saveToDb('تم تغيير الحالة ✓',true);
   }
   else if(action==='genmsg'&&sv){
     const box=$(`msgbox-${id}`);
     if(box){
       box.classList.toggle('show');
-      if(box.classList.contains('show')){
-        $(`msgtxt-${id}`).value=buildClientMsg(sv);
-      }
+      if(box.classList.contains('show'))$(`msgtxt-${id}`).value=buildClientMsg(sv);
     }
   }
   else if(action==='sendmsg'){
